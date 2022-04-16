@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <script>
+      function makeRequest(request) {
+        document.getElementById("body").innerHTML = "Loading ...";
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4) {
+            console.log("Update: ", this);
+            switch(this.status) {
+              case 200: {document.getElementById("body").innerHTML = this.responseText;
+                try {
+                  let j = JSON.parse(this.responseText);
+                  if(j.gid !== undefined) {
+                    if(confirm("Found GID, set GID field? " + j.gid)) {
+                      document.getElementById("gid").setAttribute('value', j.gid + "");
+                    }
+                  }
+                } catch (error) { }
+              } break;
+              case 503: {document.getElementById("body").innerHTML = "The node server is currently down."} break;
+              default: {document.getElementById("body").innerHTML = "Status: " + this.status ;} break;
+            }
+          }
+        };
+        xhttp.open("GET", "http://mccreas.us:33543/node?use=gameshow&" + request, true);
+        xhttp.send();
+        console.log(xhttp.responseURL)
+      }
+
+      function getVal(id) {
+        return document.getElementById(id).value;
+      }
+
+      function clbArg(args) {
+        clb("http://mccreas.us:33543/node?use=gameshow&" + args);
+      }
+      function clb(request) {
+        document.getElementById('cb').hidden = false;
+        document.getElementById('cb').value = request;
+        var copyText = document.querySelector("#cb");
+        copyText.select();
+        document.execCommand("copy");
+        document.getElementById('cb').hidden = true;
+      }
+    </script>
+  </head>
+  <body>
+    <div id="controls">
+      <h2>Server Test</h2>
+      GID: <input type="text" id="gid" style="width: 20em"></input><button onClick='clb(getVal("gid"))'>Copy</button><br/>
+      <button onClick='makeRequest("role=master&action=begin")'>Begin</button><br/>
+      <input id="messagein" type="text"></input><button onClick='makeRequest("role=master&action=message&gid=" + getVal("gid") + "&message=" + getVal("messagein"))'>Message</button><br/>
+      <button onClick='makeRequest("role=master&action=list")'>List</button><br/>
+      <button onClick='clbArg("role=viewer&action=wait&gid=" + getVal("gid"))'>Copy wait URL to clipboard</button><br/>
+
+    </div>
+    <tt id="body"></tt><input type="text" id="cb" hidden></input>
+  </body>
+</html>

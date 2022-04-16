@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="icon" href="../indexicon.png">
+    <title>BenGameShow Viewer</title>
+    <script src = "../jquery-3.4.1.js"></script>
+    <script src = "../gameshow.js"></script>
+    <link rel = "stylesheet" href = "../gameshow.css">
+    <script>
+
+      function getVal(id) {
+        return document.getElementById(id).value;
+      }
+
+      function clb(request) {
+        document.getElementById('cb').hidden = false;
+        document.getElementById('cb').value = request;
+        var copyText = document.querySelector("#cb");
+        copyText.select();
+        document.execCommand("copy");
+        document.getElementById('cb').hidden = true;
+      }
+
+      // Expected from gameshow.js: let waiting = false;
+      let xhttp = undefined;
+      waiting = false;
+
+      function toggleWait() {
+          if(waiting) {
+            waiting = false;
+            document.getElementById('wb').innerHTML = 'Begin';
+            document.getElementById('gid').disabled = false;
+            if(xhttp !== undefined) {
+              xhttp.abort();
+            }
+          } else {
+            waiting = true;
+            document.getElementById('wb').innerHTML = 'Stop';
+            document.getElementById('gid').disabled = true;
+            wait(getVal("gid"), true);
+          }
+      }
+
+      let lastid = 0
+
+      function processChunk(chunk) {
+        if(chunk.id !== undefined) {
+          lastid = chunk.id;
+        }
+        if(chunk.item !== undefined) {
+          let item = chunk.item;
+          if(item.cause !== undefined) {
+            switch(item.cause) {
+            case 'fullupdate': {
+              if(item.playfield !== null) {
+                playfield = item.playfield;
+              }
+            } break;
+            case 'update': {
+              if(item.num !== undefined && item.cell !== undefined) {
+                playfield.questions[item.num] = item.cell;
+              }
+            } break;
+            default: {
+              alert('Unknown cause ' + item.cause);
+            } break;
+            }
+          } else {
+            console.log('Cause was undefined');
+          }
+        } else {
+          console.log('Item was undefined');
+        }
+      }
+
+      function updateVisiblePlayfield() {
+        document.getElementById("table").innerHTML = getAnswerTable(false, document);
+      }
+
+      function wait(gid, first) {
+        first = (first === undefined) ? false : first;
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4) {
+            console.log("Update: ", this);
+            switch(this.status) {
+              case 200: {
+                console.log("Got response with some data! " + this.responseText);
+                try {
+                  let j = JSON.parse(this.responseText);
+                  console.log(j);
+                  let text = ''
+                  j.forEach((elem, i) => {
+                    if(elem !== undefined) {
+                      processChunk(elem);
+
+                      console.log("Found item " + i);
+                      text += elem.id + ": " + JSON.stringify(elem.item) + '<br/>';
+                    }
+                  });
+                  updateVisiblePlayfield();
+                  document.getElementById("messageprinter").innerHTML = text;
+                  if(j.gid !== undefined) {
+                    if(confirm("Found GID, set GID field? " + j.gid)) {
+                      document.getElementById("gid").setAttribute('value', j.gid + "");
+                    }
+                  }
+                } catch (error) {
+                  console.log("There was an error.");
+                  console.log(error);
+                }
+              }
+              case 204: { // No data yet
+                  setTimeout(wait(gid, false), 1000);
+              } break;
+              case 401: {
+                document.getElementById("messageprinter").innerHTML = this.responseText;
+              } break;
+              case 503: {document.getElementById("messageprinter").innerHTML = "The node server is currently down."} break;
+              default: {document.getElementById("messageprinter").innerHTML = "Status: " + this.status ;} break;
+            }
+          }
+        };
+        xhttp.open("GET", "http://mccreas.us:33543/node?use=gameshow&role=viewer&gid=" + gid + ((first) ? "&action=load" : "&action=wait&lastCID=" + lastid), true);
+        xhttp.send();
+      }
+    </script>
+  </head>
+  <body style="background-color:#000000">
+    <div id="controls">
+      GID: <input type="text" id="gid" style="width: 20em"></input>
+      <button onClick='toggleWait()' id='wb'>Begin</button><br/>
+    </div>
+
+    <center><div id="game"><div id="table">Enter a GID and join a game</div>
+      <center><h1><span id="score">This is a score slot</span><span id="scoremod"></span></h1><div id="control"></div></center>
+    </div></center><span id="xzone"></span>
+    <input type="text" id="cb" hidden></input><tt id="messageprinter"></tt>
+  </body>
+</html>
