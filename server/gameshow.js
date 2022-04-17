@@ -17,6 +17,13 @@ module.exports = {
  * ██       ██   ██  ██   ██  ██    ██  ██   ██       ██
  * ███████  ██   ██  ██   ██   ██████   ██   ██  ███████
  */
+/**
+ * Ends the response with a missing paramater error
+ * @param obj The array of arguments
+ * @param arg The argument that is missing
+ * @param res The HTTP response
+ * @return false if the argument array contains the argument, else returns undifined
+ */
 function errorArg(obj, arg, res) {
   if(obj[arg] !== undefined) {
     return false;
@@ -24,12 +31,18 @@ function errorArg(obj, arg, res) {
     finishError(res, arg);
   }
 }
-
+/**
+ * Ends the response with a missing paramater error
+ * @param res The HTTP response
+ * @param error The missing paramater
+ */
 function finishError(res, error) {
   console.log("Request did not specify " + error + ".");
   res.statusCode = 400;
   res.end(error + ' not specified');
 }
+
+
 /*
  *  ██████    █████   ███    ███  ███████        ██████  ██        █████   ███████  ███████  ███████  ███████
  * ██        ██   ██  ████  ████  ██            ██       ██       ██   ██  ██       ██       ██       ██
@@ -38,29 +51,52 @@ function finishError(res, error) {
  *  ██████   ██   ██  ██      ██  ███████        ██████  ███████  ██   ██  ███████  ███████  ███████  ███████
  */
 
+/**
+ * Stores information pertaning to a particular games
+ */
 class Game {
     constructor() {
+      // The game UUID
       this.uuid = uuid.v4() + '';
+      // Map of waiters to be notified on an update
       this.waiters = new Map();
+      // Arrray of play fields
       this.playfield = new Array();
+      // Current play field index
       this.playfieldNum = 0;
+      // Cryptographic key
       this.key = crypto.randomBytes(64).toString('base64').replace(/\//g,'_').replace(/\+/g,'-');
+      // Update buffer
       this.buff = new RingBuffer(8);
+
       let e = new Object();
       e.cause = "null";
       this.buff.add(e);
     }
 
+    /**
+     * Adds a play field to the game
+     * @param playfield the field to add
+     * @return the number of fields in the game
+     */
     addPlayfield(playfield) {
       this.playfield.push(playfield);
       return this.playfield.size - 1;
     }
 
+    /**
+     * Sends an update to all waiters
+     * @param update The update to send to the waiters
+     */
     sendUpdate(update) {
       let toSend = new Array(this.buff.add(update));
       notifyWaiters(this, toSend);
     }
 
+    /**
+     * Responds with a veiw board
+     * @param  {HTTP Response} res the response
+     */
     showViewerBoard(res) {
       let ro = new Object();
       let o = new Object();
@@ -85,6 +121,11 @@ class Game {
     }
 }
 
+/**
+ * Returns a client version of a cell
+ * @param  {[type]} cell The cell to get a version of
+ * @return {[type]} A client version of the cell
+ */
 function getClientCell(cell) {
   let obj = new Object();
   if(cell.used) {
@@ -97,13 +138,25 @@ function getClientCell(cell) {
   return obj;
 }
 
+/**
+ * Buffer that fills in a circular patern (ie when the buffer gets full, it starts overiding the first elemtn of the buffer)
+ */
 class RingBuffer {
+  /**
+   * Creates a new RingBuffer of size
+   * @param {integer} size The size of the buffer
+   */
   constructor(size) {
     this.size = size;
     this.buffer = new Array(size);
     this.nextID = 0;
   }
 
+  /**
+   * Adds an elemnt to the buffer and returns the object added
+   * @param {Object} element The object to added
+   * @return {Object} The new object in the buffer (.item is the element, .id is the id in the buffer)
+   */
   add(element) {
     let obj = new Object();
     obj.item = element;
@@ -112,6 +165,12 @@ class RingBuffer {
     return obj;
   }
 
+  /**
+   * Returns an array of all elemtns in the buffer after start
+   * @param  {integer} start The first ID in the buffer to return
+   * @return {Array} The array of all elements in the buffer after start,
+   *   or undifined if start is higher that the highest ID, or is smaller than the lowes ID still in the buffer
+   */
   get(start) {
     console.log('Next: ' + this.nextID + " Start: " + start);
     if(this.nextID - this.size > start || start < 0 || start >= this.nextID) {
@@ -126,10 +185,19 @@ class RingBuffer {
     }
   }
 
+  /**
+   * Returns the highest ID in the buffer
+   * @return {integer} The higher ID in the buffer
+   */
   getLastID() {
     return this.nextID - 1;
   }
 
+  /**
+   * Returns if the provided ID is the most recent ID in the buffer
+   * @param  {integer}  cid The ID to check
+   * @return {Boolean} If cid matches the last ID in the buffer
+   */
   isUpToDate(cid) {
     return cid == this.nextID - 1;
   }
@@ -142,6 +210,10 @@ class RingBuffer {
  * ██    ██  ██       ██    ██  ██   ██  ██   ██  ██             ██  ██   ██   ██  ██  ██        ██
  *  ██████   ███████   ██████   ██████   ██   ██  ███████         ████    ██   ██  ██   ██  ███████
  */
+/**
+ * Map of the current games by UUID
+ * @type {Map}
+ */
 let currentGames = new Map();
 
 /*
@@ -151,6 +223,11 @@ let currentGames = new Map();
  * ██   ██     ██        ██     ██            ██   ██  ██            ██  ██       ██    ██  ██  ██ ██       ██  ██
  * ██   ██     ██        ██     ██            ██   ██  ███████  ███████  ██        ██████   ██   ████  ███████  ███████
  */
+/**
+ * Responsds with an object
+ * @param  {HTTP Response} res the response
+ * @param  {Object} toSend the object to convert to JSON
+ */
 function respondJSON(res, toSend) {
   if(!res.finished) {
     res.writeHead(200, {'Content-Type': 'application/json'});
@@ -158,6 +235,12 @@ function respondJSON(res, toSend) {
   }
 }
 
+/**
+ * Alerts the waiters, and sends them an object.
+ * Clears the games waiters and timeout
+ * @param  {Game} game The game to alert
+ * @param  {Object} toSend The object to send
+ */
 function notifyWaiters(game, toSend) {
   game.waiters.forEach((waiter) => {
     respondJSON(waiter.response, toSend);
@@ -172,6 +255,13 @@ function notifyWaiters(game, toSend) {
  * ██████   ██████   ██    ██  ██       █████    ███████  ███████       ██████   █████    ██    ██  ██    ██  █████    ███████     ██     ███████
  * ██       ██   ██  ██    ██  ██       ██            ██       ██       ██   ██  ██       ██ ▄▄ ██  ██    ██  ██            ██     ██          ██
  * ██       ██   ██   ██████    ██████  ███████  ███████  ███████       ██   ██  ███████   ██████    ██████   ███████  ███████     ██     ███████
+ */
+/**
+ * Prosses an HTTP Request
+ * @param  {Array} args The arguments from the request
+ * @param  {String} body The body of the request
+ * @param  {HTTP Response} res The response object
+ * @return undifined if the arguments are missing 'role'
  */
 function process(args, body, res) {
   if(errorArg(args, 'role', res)) { return; }
