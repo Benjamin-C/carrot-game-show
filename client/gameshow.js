@@ -143,10 +143,10 @@ function prepareVideo(video) {
   meReady();
 }
 
-function prepareImage(video) {
-  console.log("Prep ing")
+function prepareImage(image) {
+  console.log("Prep img")
   openWindow();
-  videoloc = video;
+  videoloc = image;
   myMode = MyModes.IMAGE;
   meWaiting = true;
   meReady();
