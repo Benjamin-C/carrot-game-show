@@ -1,4 +1,7 @@
-node_modules
-package.json
-package-lock.json
-setupnotes.txt
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!*.js
+!*.txt
