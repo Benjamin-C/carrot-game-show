@@ -8,7 +8,9 @@ const fs = require('fs');
 
 db.begin();
 
-console.log("Node server starting at " + new Date().toLocaleString());
+const port = 33544
+
+console.log("Node server starting on localhost:" + port + " at " + new Date().toLocaleString());
 /* Main server function
  * This function is called at each HTTP request.
  * req is the http request, query is the information after the ?
@@ -85,6 +87,9 @@ http.createServer(function (req, res) {
           if(filename == "/") {
             filename = "/bengameshow.html";
           }
+          if(filename.includes("?")) {
+            filename = filename.substring(0,filename.indexOf("?"))
+          }
           fs.readFile(__dirname.substring(0,__dirname.lastIndexOf('/')) + "/client" + filename, function (err,data) {
             console.log("Trying to serve " + filename)
             if (err) {
@@ -117,7 +122,7 @@ http.createServer(function (req, res) {
     }
     console.log("Finished the HTTP request");
   });
-}).listen(33544);
+}).listen(port);
 
 /*
 const {PythonShell} = require('python-shell');

@@ -1077,7 +1077,7 @@ function savetoClipboard(text) {
  * ██   ██  ██████   ███████  ██   ███  ██   ███  ██  ██ ██  ██  ██   ███
  * ██   ██  ██   ██  ██   ██  ██    ██  ██    ██  ██  ██  ██ ██  ██    ██
  * ██████   ██   ██  ██   ██   ██████    ██████   ██  ██   ████   ██████
- * I really don't remember why this exists. Maybe I'll figure out sometime?
+ * Allows creating things that can be dragged around
  */
 
 function dragElement(elmnt) {
@@ -1130,6 +1130,7 @@ function dragElement(elmnt) {
  * This is a bunch of stuff that was added late, and is probably not done.
  */
 
+// Creates a dragable thing to control network stuffs
 function openNetworkSettings() {
   let text = '';
   text += '<div id="netsettings" class="movable">';
@@ -1143,10 +1144,12 @@ function openNetworkSettings() {
   dragElement(document.getElementById("netsettings"));
 }
 
+// Close the network settings dialog
 function closeNetworkSettings() {
   document.getElementById("netset").innerHTML = '';
 }
 
+// The class to manage networking
 class NetworkManager {
   constructor() {
     this.online = false;
@@ -1155,6 +1158,7 @@ class NetworkManager {
     this.key = '';
   }
 
+  // Tries to turn on the networking
   setOnline(online) {
     if(online) {
       let that = this;
@@ -1193,6 +1197,7 @@ class NetworkManager {
     // Need to connect to server here if required
   }
 
+  // not sure what this was supposed to do
   updateCell(num) {
     if(this.online) {
       let pl = new Object();
@@ -1203,6 +1208,7 @@ class NetworkManager {
     }
   }
 
+  // Sends a post request to the server
   sendPOSTRequest(payload) {
     if(this.online) {
       payload.key = this.key;
