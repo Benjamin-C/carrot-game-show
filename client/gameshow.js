@@ -1,15 +1,21 @@
 //  let gridAns = ["This", "Is", "some", "text", "that i", "will want", "to find out", "what will happen", "if i were to put", "way too much text in one box and it had to overflow"];
 //  let gridScore = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 
+// Should probably be updated to generate this from the web url
 const baseURL = 'http://mccreas.us:33543/node?use=gameshow';
 
+// Unused
 function matchRule(str, rule) {
   return new RegExp("^" + rule.split("*").join(".*") + "$").test(str);
 }
 
+<<<<<<< HEAD
 /**
  * @brief    Error message when player has not launched the controller.
  */
+=======
+// The load function for if the client is a player
+>>>>>>> 8b5ea40 (Added many comments)
 let playerFunc = function() {
   console.log("Player launching");
   document.getElementById("table").innerHTML = "<h1>Something has gone wrong. You should not have gotten here. Please launch the controller first.</h1>";
@@ -17,12 +23,17 @@ let playerFunc = function() {
   if (window.opener != null) {
     go = window.opener.popupReady();
   }
+  // Why is this commented out, shouldn't it still exist?
   // window.onUnload = Function() {
   //   window.opener.popupClosed();
   // }
 }
 
+<<<<<<< HEAD
 
+=======
+// The load function for if the client is a controller
+>>>>>>> 8b5ea40 (Added many comments)
 let controlFunc = function() {
   console.log("Launghing");
   document.title = "Control BenGameShow";
@@ -48,7 +59,11 @@ let blankFunc = function() {
   document.getElementById("table").innerHTML = "";
 }
 
+<<<<<<< HEAD
 //MyModes constants.
+=======
+// Game modes to determine what type of conetnt should be shown
+>>>>>>> 8b5ea40 (Added many comments)
 const MyModes = {
   GAME: 'game',
   ANS: '1answer',
@@ -57,12 +72,19 @@ const MyModes = {
   BLANK: 'blank'
 }
 
+// The current game mode
 let myMode = MyModes.GAME;
 
+// The location where the video (possibly also image) is found
 let videoloc;
+<<<<<<< HEAD
 /**
  * @brief    Playfield space creation.
  */
+=======
+
+// The playfield where all aspects of the game are stored
+>>>>>>> 8b5ea40 (Added many comments)
 let playfield = new Object();
 playfield.questions = new Array();
 playfield.width = 2;
@@ -71,27 +93,43 @@ playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
 
+<<<<<<< HEAD
 //Score evening and color.
 
+=======
+// This should probably turn into an array of objects
+// ??? ID of the current team
+>>>>>>> 8b5ea40 (Added many comments)
 let scoreid = 0;
+// Team scores
 let score = [0, 0, 0];
+// Team score colors
 let scorecolor = [ ["#ff0000", "#00FF00", "#0000ff"], ["#400000", "#004000", "#000080"], ["#200000", "#002000", "#000020"] ];
+// Score text string. Maybe should be put in a localizatoin something?
 let scoreStr = "Score = ";
 
+// The second screen presentation window
 let gamePanel;
+// If the presentation window is open and ready to be drawn to
 let gamePanelOpen = false;
 
+// Waiting for all required windows to open
 let waiting = true;
 let meWaiting = true;
 
+// The number of Xs to be shown next time (for family fued style games)
 let nextx = 1;
 
+// ??? If the next view transition should be a fade
 let nextFadeMode = false;
 
+// The name for the cookie storing a backup of the current game
 let backup_name = "backup-game";
 
+// URL paramaters, maybe should be parsed by the browser?
 let args = window.location.toString().split('?').pop().split("&");
 
+// ??? If the color settings should be shown on the control speed
 let showColorConfig = false;
 
 // Init code
@@ -123,9 +161,13 @@ function initGameshowController() {
   }
 }
 
+<<<<<<< HEAD
 /**
  * @brief    Beginning of new game.
  */
+=======
+// Starts a new game based on the settings in the setting fields
+>>>>>>> 8b5ea40 (Added many comments)
 function startnew() {
   playfield.width = parseInt(document.getElementById("inw").value);
   playfield.height = parseInt(document.getElementById("inh").value);
@@ -151,7 +193,11 @@ function startnew() {
  * ██       ██   ██  ███████  ██       ██   ██  ██   ██  ███████
  */
 
+<<<<<<< HEAD
 
+=======
+// Prepres to show a video
+>>>>>>> 8b5ea40 (Added many comments)
 function prepareVideo(video) {
   console.log("Prep video")
   openWindow();
@@ -161,6 +207,7 @@ function prepareVideo(video) {
   meReady();
 }
 
+// Prepares to show an image
 function prepareImage(image) {
   console.log("Prep img")
   openWindow();
@@ -170,9 +217,10 @@ function prepareImage(image) {
   meReady();
 }
 
+// Prepare to make the screen blank
 function prepareBlank() {
   if (mymode = MyModes.GAME) {
-
+    // What's supposed to be here?
   }
   console.log("Prep blank")
   openWindow();
@@ -181,6 +229,8 @@ function prepareBlank() {
   meReady();
 }
 
+// Prepares from the game from a provided game file
+// Definantly supports online files, but should? also support local files
 function prepareFromFile(file) {
   let allText = "";
   let rawFile = new XMLHttpRequest();
@@ -202,6 +252,7 @@ function prepareFromFile(file) {
   return allText;
 }
 
+// Prepare the game from a JSON string
 function prepare(json) {
   if (json != "blank") {
     if (!loadjson(json)) {
@@ -222,7 +273,10 @@ function prepare(json) {
  *      ██  ███████  ██    ██  ██ ██  ██
  * ██   ██       ██  ██    ██  ██  ██ ██
  *  █████   ███████   ██████   ██   ████
+ * Load and save JSON game files
  */
+
+// Convert old question formats to new question formats
 function convertOldQuestions(oldq, size) {
   let nq = new Array(size);
   for(let i = 0; i < size; i++) {
@@ -231,6 +285,9 @@ function convertOldQuestions(oldq, size) {
   return nq;
 }
 
+// Load JSON from a text string
+// Returns true if the JSON was loaded, false otherwise
+// Has cases for all old versions, and they *should* import correctly
 function loadjson(json) {
   if (json != "blank") {
     if (json != null) {
@@ -319,6 +376,7 @@ function loadjson(json) {
   }
 }
 
+// Creates a blank question object
 function makejobject(i, o) {
   let obj = (o === undefined) ? new Object() : o;
   obj.answer = document.getElementById('ans' + i).value;
@@ -330,16 +388,15 @@ function makejobject(i, o) {
   return obj;
 }
 
+// Saves a game object to a string to save to a file
 function makeSavefile(outJSON) {
-  // let saveversion = 3;
-  // injson = "Ben's Game Show Question File#" + saveversion + "#" + width + "#" + height + "#" + biganswer + "#" + squarebox + "#" + title + "#" + JSON.stringify(outJSON);
-  // return injson;
   let saveversion = 4;
   injson = "Ben's Game Show Question File#" + saveversion + "#" + JSON.stringify(outJSON);
   return injson;
 }
 
-// TODO this may not be needed anymore
+// TODO this may not be needed anymore, although it is still used in some places
+// Saves the current state to an object ready to be JSONified
 function saveToObj() {
   for (let i = 0; i < (playfield.width * playfield.height); i++) {
     playfield.questions[i] = makejobject(i, playfield.questions[i]);
@@ -347,6 +404,7 @@ function saveToObj() {
   return playfield;
 }
 
+// Saves the game as JSON, possibly printing to cosole
 function savejson(silent) {
   // V3
   // let outJSON = new Object();
@@ -362,17 +420,7 @@ function savejson(silent) {
   return injson;
 }
 
-// function savefulljson() {
-//   let outJSON = new Object();
-//   for (let i = 0; i < (width * height); i++) {
-//     let obj = makejobject(i);
-//     obj.used = questions[i].used;
-//     // obj.showscore = document.getElementById('dosc' + i).checked;
-//     outJSON[i] = obj;
-//   }
-//   return makeSavefile(outJSON);
-// }
-
+// Saves a copy of the game to a cookie
 function cacheGame() {
   setCookie(backup_name, savejson(true), 1);
 }
@@ -383,15 +431,20 @@ function cacheGame() {
  * ██ ████ ██  ██    ██  ██   ██  █████         ███████  ██  █  ██  ██     ██     ██       ███████
  * ██  ██  ██  ██    ██  ██   ██  ██                 ██  ██ ███ ██  ██     ██     ██       ██   ██
  * ██      ██   ██████   ██████   ███████       ███████   ███ ███   ██     ██      ██████  ██   ██
+ * Switch between different view modes
  */
+
+// Pause a video? Where is the video paused? Does this actually do anything?
 function pauseVideo() {
   controlGameFade(1, 10);
 }
 
+// Fades the game to something
 function fadeGame() {
   controlGameFade(0, 500);
 }
 
+// Actually does the fade animations
 function controlGameFade(opas, time, onDone) {
   if (nextFadeMode == false) {
     if (myMode == MyModes.VIDEO) {
@@ -426,11 +479,15 @@ function controlGameFade(opas, time, onDone) {
   nextFadeMode = !nextFadeMode;
 }
 
+// Load game from cookies
+// Probably shows it now?
 function handleCacheSelect() {
   let t = readCookie(backup_name);
   prepare(t);
 }
 
+// Load game from loaded file
+// Probably shows it now?
 function handleFileSelect(evt) {
   console.log("Loading file")
   let files = evt.target.files; // FileList object
@@ -449,6 +506,8 @@ function handleFileSelect(evt) {
   reader.readAsText(file);
 }
 
+// Loads video from a file
+// Probably shows it now?
 function handleVideoSelect(evt) {
   console.log("HVS");
   nextFadeMode = false;
@@ -461,6 +520,8 @@ function handleVideoSelect(evt) {
   prepareVideo(URL.createObjectURL(file));
 }
 
+// Load an image from a file
+// Probably shows it now?
 function handleImageSelect(evt) {
   console.log("Loading Image");
   let files = evt.target.files; // FileList object
@@ -471,6 +532,7 @@ function handleImageSelect(evt) {
   prepareImage(URL.createObjectURL(file));
 }
 
+// Shows nothing ?now?
 function handleBlankSelect(evt) {
   console.log("Loading nothing");
   prepareBlank();
@@ -482,11 +544,12 @@ function handleBlankSelect(evt) {
  * ██████   ██    ██  ██  ██       ██   ██
  * ██   ██  ██    ██  ██  ██       ██   ██
  * ██████    ██████   ██  ███████  ██████
+ * Builds the visible parts of the gameshow
  */
 function build() {
   console.log("Building");
-  // document.getElementById("topnav").innerHTML = "TopNav";
   switch (myMode) {
+    // For when the gameshow view window is supposed to be playing videos
     case MyModes.VIDEO: {
       // for this window
       let tbl = "Playing video";
@@ -503,6 +566,7 @@ function build() {
       hideScore();
     }
     break;
+  // For when the gameshow view window is suppsoed to be blank
   case MyModes.BLANK: {
     // for this window
     let tbl = "Showing nothing";
@@ -518,6 +582,7 @@ function build() {
     hideScore();
   }
   break;
+  // For when the gamesnow view window is suppsoed to show an image
   case MyModes.IMAGE: {
     // for this window
     let tbl = "Showing image";
@@ -533,8 +598,9 @@ function build() {
     hideScore();
   }
   break;
+  // For when you are actually playing the game
   case MyModes.GAME: {
-    $.css
+    $.css // Does this line do anything nice?
     // for this window
     let biga = "";
     if (playfield.biganswer) {
@@ -569,12 +635,13 @@ function build() {
     gamePanel.document.title = "BenGameShow";
     //document.getElementById('control').innerHTML = "</div><center><table><tr><td><h1 id=\"score\"></h1></td><td><button onclick=\"savejson()\"><h1>Save</h1></button></td></tr></table></center>";
     showScore();
-    cacheGame();
+    cacheGame(); // Save the game to the cache in case something crashes
   }
   break;
   }
 }
 
+// Shows or hides the color modification boxes for cleaner view if you are not changing colors
 function setShowColorConfig() {
   showColorConfig = document.getElementById('configcolor').checked;
   for (let i = 0; i < playfield.height; i++) {
@@ -585,6 +652,7 @@ function setShowColorConfig() {
   }
 }
 
+// Creates a table element to add to the control table for a specific cell.
 // <button onclick=\"myclickkeep(" + num + ")\"><h3>" + (num + 1) + "(" + questions[num].points + "): " + questions[num].answer + "</h3></button>
 function getNewControlTableBox_param(num, used) {
   let showscorevalue = "";
@@ -615,10 +683,13 @@ function getNewControlTableBox_param(num, used) {
   return txt;
 }
 
+// Calls the above functoin with the current used state.
+// The above does not seem to be used anywher else, so these should maybe be merged
 function getNewControlTableBox(num) {
   return getNewControlTableBox_param(num, playfield.questions[num].used);
 }
 
+// Gets the HTML table shown on the player viewer display
 function getAnswerTable(privileged, doc, vsf) {
   privileged = (privileged === undefined) ? true : privileged;
   doc = (doc === undefined) ? gamePanel : doc;
@@ -646,6 +717,7 @@ function getAnswerTable(privileged, doc, vsf) {
   return tbl;
 }
 
+// Gets the boxes for the abve table
 function getNewAnswerTableBox_param(num, text, color, hide, boxwidth, boxheight, privileged) {
   privileged = (privileged === undefined) ? true : privileged;
   console.log(privileged);
@@ -682,15 +754,19 @@ function getNewAnswerTableBox_param(num, text, color, hide, boxwidth, boxheight,
   return txt;
 }
 
+// Gets the boxes for the above table, but with more default values
 function getNewAnswerTableBox(num, boxwidth, boxheight, privileged) {
   return getNewAnswerTableBox_param(num, playfield.questions[num].used, playfield.questions[num].used, (playfield.biganswer && playfield.questions[num].used), boxwidth, boxheight, privileged);
 }
 
+// Hides the score display
+// Used for blank/image/video/big answers
 function hideScore() {
   document.getElementById("score").innerHTML = "";
   gamePanel.document.getElementById("score").innerHTML = "";
 }
 
+// Shows the score display
 function showScore() {
   var cfg = "";
   var scb = "<table><tr>";
@@ -707,6 +783,7 @@ function showScore() {
   gamePanel.document.getElementById("score").innerHTML = scb;
 }
 
+// Gets a number of nonbreaking spaces
 function nbsp(num) {
   var n = "";
   if(num > 0) {
@@ -717,21 +794,26 @@ function nbsp(num) {
   return n;
 }
 
+// Gets the background color of the webpage
 function getBackgroundColor() {
   var val = document.body.style.backgroundColor;
   return val;
 }
 
+// Creates the score display sections
 function createScoreLabel(id) {
   // return "<p style=\"color:" + scorecolor[0][id] + ";background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\>" + scoreStr + score[id] + "</p>";
   // return scoreStr + score[id];
   return "<h1 style=\"border:" + ((id == scoreid) ? scorecolor[0][id] : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + scorecolor[0][id] + "\">&nbsp" + scoreStr + score[id] + "&nbsp</h1>";
 }
 
+// Creates the buttons gamemasters can use to control scores
 function createScoreButton(id) {
   return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + scorecolor[0][id] + "; background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\"><h2>" + scoreStr + score[id] + "</h2></button>";
 }
 
+// Sets the currently selected Team
+// Should probably check if scores are currently shown before showing them
 function setScoreID(id) {
   scoreid = id;
   // for(var iter = 0; iter < score.length; iter++) {
@@ -741,19 +823,24 @@ function setScoreID(id) {
   showScore();
 }
 
+// Opens the main window, setting up the second (player) display
 function openWindow() {
   if (!gamePanelOpen) {
     gamePanel = window.open("bengameshow.html?role=player", null, "status=no,toolbar=no,menubar=no,location=no,titlebar=no"); //height=720,width=1280,
     gamePanelOpen = true;
   } else {
+    // Don't need to open the other window multiple times per game
     console.log("Windw open, not doing anything")
   }
 }
 
+// Supposed to be called when the popup closes so that it can be handled cleanly
+// Currently dones't seem to be called
 function popupClosed() {
   gamePanelOpen = false;
 }
 
+// Called when the popup is ready to do stuff
 function popupReady() {
   if (waiting) {
     waiting = false;
@@ -764,6 +851,7 @@ function popupReady() {
   }
 }
 
+// Called when the main window is ready
 function meReady() {
   if (meWaiting) {
     meWaiting = false;
@@ -774,6 +862,7 @@ function meReady() {
   }
 }
 
+// Called once both the main window and the popup are ready
 function prepBuild() {
   console.log("prepBuild");
   if (document.getElementById("fadebox").checked) {
@@ -796,11 +885,12 @@ function prepBuild() {
  * ██   ██  ██   ████  ███████   ███ ███   ███████  ██   ██         ████    ██  ███████   ███ ███
  */
 
+// Shows an answer to a question
 function showans(num) {
   if (playfield.biganswer) {
     // myMode = MyModes.ANS;
     document.getElementById("ansbtn" + num).onclick = function() {
-      doneans(num)
+      doneans(num); // Call doneans to clean up large answers
     };
     document.getElementById("ansbtn" + num).innerHTML = "Done";
 
@@ -837,6 +927,7 @@ function showans(num) {
   }
 }
 
+// Function to call when you are done viewing a large answer
 function doneans(num) {
   document.getElementById("ansbtn" + num).onclick = function() {
     hideans(num)
@@ -860,6 +951,7 @@ function doneans(num) {
   gamePanel.document.getElementById("table").innerHTML = getAnswerTable();
 }
 
+// Function to call to hide an already visible answer
 function hideans(num) {
   document.getElementById("ansbtn" + num).onclick = function() {
     showans(num)
@@ -880,7 +972,9 @@ function hideans(num) {
  * ██    ██  ██       ██   ██  ██   ██     ██     ██
  *  ██████   ██       ██████   ██   ██     ██     ███████
  */
+
 // Seems to be called every time any aspect of a box changes
+// Updates colors and some text
 function update(num) {
   let question = makejobject(num, playfield.questions[num]);
 
@@ -909,6 +1003,7 @@ function update(num) {
   cacheGame(); // Put here because setcol() is called after each time a question is changed from the answer,hide,or looks buttons, so that the game essentially autosaves often.
 }
 
+// Change the title
 function titlechange() {
   playfield.title = document.getElementById("titlebox").value;
   playfield.biganswer = document.getElementById("bigansbox").checked;
@@ -916,6 +1011,7 @@ function titlechange() {
   build();
 }
 
+// Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
 function scorechange(dir) {
   let change = parseInt(document.getElementById("scoremodnum").value);
   if (dir == 1) {
@@ -936,11 +1032,13 @@ function scorechange(dir) {
  * ██       ██   ██  ██  ███████       ██   ██
  */
 
+// Resets the number of Xs
 function showXr() {
   nextx = 1;
   showX(0);
 }
 
+// Shows the Xs above other stuff
 function showX(num) {
   if (num > 0) {
     nextx = num + 1;
@@ -966,10 +1064,6 @@ function showX(num) {
   gamePanel.document.getElementById("xzone").innerHTML = xs;
 }
 
-function testme() {
-  alert("text");
-}
-
 /*
  *  ██████   ██████    ██████   ██   ██  ██  ███████  ███████
  * ██       ██    ██  ██    ██  ██  ██   ██  ██       ██
@@ -978,6 +1072,7 @@ function testme() {
  *  ██████   ██████    ██████   ██   ██  ██  ███████  ███████
  */
 
+// Sets a cookie to store the game state
 function setCookie(cname, cvalue, exdays) {
   let d = new Date();
   d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -985,6 +1080,7 @@ function setCookie(cname, cvalue, exdays) {
   document.cookie = cname + "=" + cvalue + ";" + expires + "; samesite=strict";
 }
 
+// Reads a cookie if it exists, returns empty string if it does not.
 function readCookie(cname) {
   let indata = document.cookie.split("; ");
   for (let i = 0; i < indata.length; i++) {
@@ -1000,6 +1096,7 @@ function readCookie(cname) {
   return "";
 }
 
+// Copies stuff to the user's clipboard
 function savetoClipboard(text) {
   document.getElementById('cb').hidden = false;
   document.getElementById('cb').value = text;
@@ -1015,6 +1112,7 @@ function savetoClipboard(text) {
  * ██   ██  ██████   ███████  ██   ███  ██   ███  ██  ██ ██  ██  ██   ███
  * ██   ██  ██   ██  ██   ██  ██    ██  ██    ██  ██  ██  ██ ██  ██    ██
  * ██████   ██   ██  ██   ██   ██████    ██████   ██  ██   ████   ██████
+ * I really don't remember why this exists. Maybe I'll figure out sometime?
  */
 
 function dragElement(elmnt) {
@@ -1064,6 +1162,7 @@ function dragElement(elmnt) {
  * ██ ██  ██  █████       ██     ██  █  ██  ██    ██  ██████   █████    ██  ██ ██  ██  ██   ███
  * ██  ██ ██  ██          ██     ██ ███ ██  ██    ██  ██   ██  ██  ██   ██  ██  ██ ██  ██    ██
  * ██   ████  ███████     ██      ███ ███    ██████   ██   ██  ██   ██  ██  ██   ████   ██████
+ * This is a bunch of stuff that was added late, and is probably not done.
  */
 
 function openNetworkSettings() {
