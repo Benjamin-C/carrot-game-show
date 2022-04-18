@@ -7,6 +7,9 @@ function matchRule(str, rule) {
   return new RegExp("^" + rule.split("*").join(".*") + "$").test(str);
 }
 
+/**
+ * @brief    Error message when player has not launched the controller.
+ */
 let playerFunc = function() {
   console.log("Player launching");
   document.getElementById("table").innerHTML = "<h1>Something has gone wrong. You should not have gotten here. Please launch the controller first.</h1>";
@@ -18,6 +21,8 @@ let playerFunc = function() {
   //   window.opener.popupClosed();
   // }
 }
+
+
 let controlFunc = function() {
   console.log("Launghing");
   document.title = "Control BenGameShow";
@@ -43,6 +48,7 @@ let blankFunc = function() {
   document.getElementById("table").innerHTML = "";
 }
 
+//MyModes constants.
 const MyModes = {
   GAME: 'game',
   ANS: '1answer',
@@ -54,7 +60,9 @@ const MyModes = {
 let myMode = MyModes.GAME;
 
 let videoloc;
-
+/**
+ * @brief    Playfield space creation.
+ */
 let playfield = new Object();
 playfield.questions = new Array();
 playfield.width = 2;
@@ -62,6 +70,8 @@ playfield.height = 5;
 playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
+
+//Score evening and color.
 
 let scoreid = 0;
 let score = [0, 0, 0];
@@ -85,6 +95,10 @@ let args = window.location.toString().split('?').pop().split("&");
 let showColorConfig = false;
 
 // Init code
+
+/**
+ * @brief    Controller startup.
+ */ 
 function initGameshowController() {
   window.onload = controlFunc;
   let setRole = false;
@@ -109,6 +123,9 @@ function initGameshowController() {
   }
 }
 
+/**
+ * @brief    Beginning of new game.
+ */
 function startnew() {
   playfield.width = parseInt(document.getElementById("inw").value);
   playfield.height = parseInt(document.getElementById("inh").value);
@@ -133,6 +150,7 @@ function startnew() {
  * ██       ██   ██  ██       ██       ██   ██  ██   ██  ██
  * ██       ██   ██  ███████  ██       ██   ██  ██   ██  ███████
  */
+
 
 function prepareVideo(video) {
   console.log("Prep video")
@@ -292,7 +310,7 @@ function loadjson(json) {
           playfield.questions = convertOldQuestions(JSON.parse(indata[4]), playfield.width*playfield.height);
           return true;
         }
-      } else if (indata[0] = "Ben's Tame Show Question File") {
+      } else if (indata[0] = "Ben's Game Show Question File") {
         return false;
       }
     }
