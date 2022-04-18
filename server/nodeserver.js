@@ -1,10 +1,11 @@
-// Requires modules uuid,node-mysql
+// Requires modules uuid,node-mysql,mime
 
 var http = require('http');
 const url = require('url');
 const db = require('./db');
 const gameshow = require('./gameshow.js');
 const fs = require('fs');
+const mime = require('mime');
 
 db.begin();
 
@@ -96,16 +97,19 @@ http.createServer(function (req, res) {
               res.writeHead(404);
               res.end("404: " + JSON.stringify(err));
               return;
-            }
-            let ext = filename.substring(filename.lastIndexOf("."))
-            if(ext == "html") {
-              res.writeHead(200, {'Content-Type': 'text/html'});
-            } else if(ext == 'js') {
-              res.writeHead(200, {'Content-Type': 'application/json'});
             } else {
-              res.writeHead(200, {'Content-Type': 'unknown'});
+            // let ext = filename.substring(filename.lastIndexOf("."))
+            // if(ext == "html") {
+            //   res.writeHead(200, {'Content-Type': 'text/html'});
+            // } else if(ext == 'js') {
+            //   res.writeHead(200, {'Content-Type': 'application/json'});
+            // } else {
+            //   res.writeHead(200, {'Content-Type': 'unknown'});
+            // }
+              console.log(mime.getType(filename))
+              res.writeHead(200, {'Content-Type': mime.getType(filename)});
+              res.end(data);
             }
-            res.end(data);
           });
           // res.end(db.makeerrorhtml("Node Error", "There was a NodeJS error.", false));
           // console.log("The use paramater was not specified");
