@@ -9,13 +9,7 @@ function matchRule(str, rule) {
   return new RegExp("^" + rule.split("*").join(".*") + "$").test(str);
 }
 
-<<<<<<< HEAD
-/**
- * @brief    Error message when player has not launched the controller.
- */
-=======
 // The load function for if the client is a player
->>>>>>> 8b5ea40 (Added many comments)
 let playerFunc = function() {
   console.log("Player launching");
   document.getElementById("table").innerHTML = "<h1>Something has gone wrong. You should not have gotten here. Please launch the controller first.</h1>";
@@ -29,11 +23,7 @@ let playerFunc = function() {
   // }
 }
 
-<<<<<<< HEAD
-
-=======
 // The load function for if the client is a controller
->>>>>>> 8b5ea40 (Added many comments)
 let controlFunc = function() {
   console.log("Launghing");
   document.title = "Control BenGameShow";
@@ -59,11 +49,7 @@ let blankFunc = function() {
   document.getElementById("table").innerHTML = "";
 }
 
-<<<<<<< HEAD
-//MyModes constants.
-=======
 // Game modes to determine what type of conetnt should be shown
->>>>>>> 8b5ea40 (Added many comments)
 const MyModes = {
   GAME: 'game',
   ANS: '1answer',
@@ -77,14 +63,8 @@ let myMode = MyModes.GAME;
 
 // The location where the video (possibly also image) is found
 let videoloc;
-<<<<<<< HEAD
-/**
- * @brief    Playfield space creation.
- */
-=======
 
 // The playfield where all aspects of the game are stored
->>>>>>> 8b5ea40 (Added many comments)
 let playfield = new Object();
 playfield.questions = new Array();
 playfield.width = 2;
@@ -93,13 +73,8 @@ playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
 
-<<<<<<< HEAD
-//Score evening and color.
-
-=======
 // This should probably turn into an array of objects
 // ??? ID of the current team
->>>>>>> 8b5ea40 (Added many comments)
 let scoreid = 0;
 // Team scores
 let score = [0, 0, 0];
@@ -136,7 +111,7 @@ let showColorConfig = false;
 
 /**
  * @brief    Controller startup.
- */ 
+ */
 function initGameshowController() {
   window.onload = controlFunc;
   let setRole = false;
@@ -161,13 +136,7 @@ function initGameshowController() {
   }
 }
 
-<<<<<<< HEAD
-/**
- * @brief    Beginning of new game.
- */
-=======
 // Starts a new game based on the settings in the setting fields
->>>>>>> 8b5ea40 (Added many comments)
 function startnew() {
   playfield.width = parseInt(document.getElementById("inw").value);
   playfield.height = parseInt(document.getElementById("inh").value);
@@ -193,11 +162,7 @@ function startnew() {
  * ██       ██   ██  ███████  ██       ██   ██  ██   ██  ███████
  */
 
-<<<<<<< HEAD
-
-=======
 // Prepres to show a video
->>>>>>> 8b5ea40 (Added many comments)
 function prepareVideo(video) {
   console.log("Prep video")
   openWindow();
