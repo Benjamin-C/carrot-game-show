@@ -1,7 +1,10 @@
+// Requires modules uuid,node-mysql
+
 var http = require('http');
 const url = require('url');
 const db = require('./db');
 const gameshow = require('./gameshow.js');
+const fs = require('fs');
 
 db.begin();
 
@@ -78,13 +81,30 @@ http.createServer(function (req, res) {
           });
         } break;
         default: {
-          res.end(db.makeerrorhtml("Node Error", "There was a NodeJS error.", false));
-          console.log("The use paramater was not specified");
-          let msg = "";
-          for(let i = 0; i < args.length; i++) {
-            msg += objToString(args[i], true) + " ";
-          }
-          console.log("The paramaters were: " + msg);
+          fs.readFile(__dirname.substring(0,__dirname.lastIndexOf('/')) + "/client" + req.url, function (err,data) {
+            console.log("Trying to serve " + req.url)
+            if (err) {
+              res.writeHead(404);
+              res.end("404<br/>" + JSON.stringify(err));
+              return;
+            }
+            let ext = req.url.substring(req.url.lastIndexOf("."))
+            if(ext == "html") {
+              res.writeHead(200, {'Content-Type': 'text/html'});
+            } else if(ext == 'js') {
+              res.writeHead(200, {'Content-Type': 'application/json'});
+            } else {
+              res.writeHead(200, {'Content-Type': 'unknown'});
+            }
+            res.end(data);
+          });
+          // res.end(db.makeerrorhtml("Node Error", "There was a NodeJS error.", false));
+          // console.log("The use paramater was not specified");
+          // let msg = "";
+          // for(let i = 0; i < args.length; i++) {
+          //   msg += objToString(args[i], true) + " ";
+          // }
+          // console.log("The paramaters were: " + msg);
         } break;
       } // end switch
     } else {
