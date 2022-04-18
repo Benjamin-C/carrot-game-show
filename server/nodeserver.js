@@ -81,14 +81,18 @@ http.createServer(function (req, res) {
           });
         } break;
         default: {
-          fs.readFile(__dirname.substring(0,__dirname.lastIndexOf('/')) + "/client" + req.url, function (err,data) {
-            console.log("Trying to serve " + req.url)
+          let filename = req.url;
+          if(filename == "/") {
+            filename = "/bengameshow.html";
+          }
+          fs.readFile(__dirname.substring(0,__dirname.lastIndexOf('/')) + "/client" + filename, function (err,data) {
+            console.log("Trying to serve " + filename)
             if (err) {
               res.writeHead(404);
-              res.end("404<br/>" + JSON.stringify(err));
+              res.end("404: " + JSON.stringify(err));
               return;
             }
-            let ext = req.url.substring(req.url.lastIndexOf("."))
+            let ext = filename.substring(filename.lastIndexOf("."))
             if(ext == "html") {
               res.writeHead(200, {'Content-Type': 'text/html'});
             } else if(ext == 'js') {
