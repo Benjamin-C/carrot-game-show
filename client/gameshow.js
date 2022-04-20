@@ -76,10 +76,29 @@ playfield.squarebox = false;
 // This should probably turn into an array of objects
 // ??? ID of the current team
 let scoreid = 0;
-// Team scores
+// Team scores, may soon be depricated
 let score = [0, 0, 0];
+
+function genTeam(name, fore, select, back) {
+	let team = new Object();
+	team.name = name;
+	team.forecol = fore;
+	team.selcol = select;
+	team.backcol = back;
+	team.score = 0;
+	return team;
+}
+
+let teams = [];
+let teamGenCount = 3;
+
 // Team score colors
 let scorecolor = [ ["#ff0000", "#00FF00", "#0000ff"], ["#400000", "#004000", "#000080"], ["#200000", "#002000", "#000020"] ];
+
+for(let i = 0; i < teamGenCount; i++) {
+	teams.push(genTeam("", scorecolor[0][i], scorecolor[1][i], scorecolor[2][i]))
+}
+
 // Score text string. Maybe should be put in a localizatoin something?
 let scoreStr = "Score = ";
 

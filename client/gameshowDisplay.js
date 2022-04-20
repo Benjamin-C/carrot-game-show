@@ -231,7 +231,17 @@ function hideScore() {
 function showScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
-	for(let i = 0; i < score.length; i++) {
+	for(let i = 0; i < teams.length; i++) {
+		teams[i].score = 0;
+	}
+	for(let i = 0; i < playfield.questions.length; i++) {
+		let t = playfield.questions[i].team;
+		let qs = playfield.questions[i].points;
+		if(t >= 0 && t < teams.length) {
+			teams[t].score += qs;
+		}
+	}
+	for(let i = 0; i < teams.length; i++) {
 		if(i > 0) {
 			cfg += nbsp(4);
 			scb += "<td>" + "</td>";
@@ -263,14 +273,21 @@ function getBackgroundColor() {
 
 // Creates the score display sections
 function createScoreLabel(id) {
-	// return "<p style=\"color:" + scorecolor[0][id] + ";background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\>" + scoreStr + score[id] + "</p>";
-	// return scoreStr + score[id];
-	return "<h1 style=\"border:" + ((id == scoreid) ? scorecolor[0][id] : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + scorecolor[0][id] + "\">&nbsp" + scoreStr + score[id] + "&nbsp</h1>";
+	if(id < teams.length) {
+		return "<h1 style=\"border:" + ((id == scoreid) ? teams[id].forecol : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + teams[id].forecol + "\">&nbsp" + scoreStr + teams[id].score + "&nbsp</h1>";
+	} else {
+		return ""
+	}
+
 }
 
 // Creates the buttons gamemasters can use to control scores
 function createScoreButton(id) {
-	return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + scorecolor[0][id] + "; background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\"><h2>" + scoreStr + score[id] + "</h2></button>";
+	if(id < teams.length) {
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + teams[id].forecol + "; background-color:" + (	(id == scoreid) ? teams[id].selcol : teams[id].backcol) + "\"><h2>" + scoreStr + teams[id].score + "</h2></button>";
+	} else {
+		return ""
+	}
 }
 
 // Sets the currently selected Team
@@ -348,7 +365,8 @@ function prepBuild() {
 
 // Shows an answer to a question
 function showans(num) {
-	if (playfield.biganswer) {
+	playfield.questions[num].team = scoreid;
+	if (playfield.biganswer) { // This does not seem to work
 		// myMode = MyModes.ANS;
 		document.getElementById("ansbtn" + num).onclick = function() {
 			doneans(num); // Call doneans to clean up large answers
@@ -379,7 +397,7 @@ function showans(num) {
 
 		playfield.questions[num].used = true;
 		let pts = parseInt(document.getElementById("pts" + num).value);
-		score[scoreid] = score[scoreid] + pts;
+		// score[scoreid] = score[scoreid] + pts;
 
 		update(num);
 		// document.getElementById("box" + num).className = "used";
@@ -419,6 +437,7 @@ function hideans(num) {
 	};
 	document.getElementById("ansbtn" + num).innerHTML = "<h3>Answer</h3>";
 	playfield.questions[num].used = false;
+	playfield.questions[num].team = -1;
 	let pts = parseInt(document.getElementById("pts" + num).value);
 	score[scoreid] = score[scoreid] - pts;
 	showScore();
