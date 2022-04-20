@@ -112,6 +112,7 @@ Feature requests and bugs both get associated issues.
 Keep issue titles concise, and include details in the description.
 
 Additionally, I encourage you to add a tasklist to issues. This can be done by typing into the description
+
     - [x] Task 1 that is done
     - [ ] Task 2 that is not done
 
