@@ -98,7 +98,7 @@ function loadjson(json) {
 					playfield.questions = convertOldQuestions(JSON.parse(indata[4]), playfield.width*playfield.height);
 					return true;
 				}
-			} else if (indata[0] = "Ben's Game Show Question File") {
+			} else { // Probably should just catch anything else
 				return false;
 			}
 		}
