@@ -25,10 +25,10 @@ function loadjson(json) {
 			let indata = json.split("#");
 			if (indata[0] == "Ben's Game Show Question File") {
 				let qfileversion = 0;
-				if (indata.length == 5) {
-					qfileversion = 1;
-				} else {
+				try {
 					qfileversion = parseInt(indata[1]);
+				} catch (error) {
+					qfileversion = 1;
 				}
 				if (indata.length >= 2) {
 					switch (qfileversion) {
@@ -75,15 +75,22 @@ function loadjson(json) {
 						} break;
 						case 4: {
 							console.log("Q version 4");
-							if(indata.length == 3 && indata[2] !== undefined) {
-								let save = JSON.parse(indata[2]);
+							if(indata.length >= 3 && indata[2] !== undefined) {
+								console.log(json);
+								let str = json.substring(json.indexOf("#")+1);
+								console.log(str);
+								str = str.substring(str.indexOf("#")+1)
+								console.log(str);
+								let save = JSON.parse(str);
 								if(save.width !== undefined && save.height !== undefined && save.biganswer !== undefined && save.squarebox !== undefined && save.title !== undefined && save.questions !== undefined) {
 									playfield = save;
 								} else {
 									console.log('JSON loading error');
+									alert("Error reading playfield data.")
 								}
 							} else {
 								console.log('File loading error')
+								alert("Error loading file. Please refresh the page, then try a different file.")
 							}
 							return true;
 						} break;

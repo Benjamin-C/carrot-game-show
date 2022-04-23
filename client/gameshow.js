@@ -72,6 +72,7 @@ playfield.height = 5;
 playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
+playfield.teams = []
 
 // This should probably turn into an array of objects
 // ??? ID of the current team
@@ -89,14 +90,14 @@ function genTeam(name, fore, select, back) {
 	return team;
 }
 
-let teams = [];
-let teamGenCount = 3;
+// let teams = [];
+// let teamGenCount = 3;
 
 // Team score colors
-let scorecolor = [ ["#ff0000", "#00FF00", "#0000ff"], ["#400000", "#004000", "#000080"], ["#200000", "#002000", "#000020"] ];
+let scorecolor = [ ["#ff0000", "#00FF00", "#0000ff", "#FFFF00"], ["#400000", "#004000", "#000080", "#404000"], ["#200000", "#002000", "#000020", "#202000"] ];
 
-for(let i = 0; i < teamGenCount; i++) {
-	teams.push(genTeam("", scorecolor[0][i], scorecolor[1][i], scorecolor[2][i]))
+for(let i = 0; i < scorecolor[0].length; i++) {
+	playfield.teams.push(genTeam("", scorecolor[0][i], scorecolor[1][i], scorecolor[2][i]))
 }
 
 // Score text string. Maybe should be put in a localizatoin something?

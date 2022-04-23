@@ -231,17 +231,17 @@ function hideScore() {
 function showScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
-	for(let i = 0; i < teams.length; i++) {
-		teams[i].score = 0;
+	for(let i = 0; i < playfield.teams.length; i++) {
+		playfield.teams[i].score = 0;
 	}
 	for(let i = 0; i < playfield.questions.length; i++) {
 		let t = playfield.questions[i].team;
 		let qs = playfield.questions[i].points;
-		if(t >= 0 && t < teams.length) {
-			teams[t].score += qs;
+		if(t >= 0 && t < playfield.teams.length) {
+			playfield.teams[t].score += qs;
 		}
 	}
-	for(let i = 0; i < teams.length; i++) {
+	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
 			cfg += nbsp(4);
 			scb += "<td>" + "</td>";
@@ -273,8 +273,8 @@ function getBackgroundColor() {
 
 // Creates the score display sections
 function createScoreLabel(id) {
-	if(id < teams.length) {
-		return "<h1 style=\"border:" + ((id == scoreid) ? teams[id].forecol : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + teams[id].forecol + "\">&nbsp" + scoreStr + teams[id].score + "&nbsp</h1>";
+	if(id < playfield.teams.length) {
+		return "<h1 style=\"border:" + ((id == scoreid) ? playfield.teams[id].forecol : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + playfield.teams[id].forecol + "\">&nbsp" + scoreStr + playfield.teams[id].score + "&nbsp</h1>";
 	} else {
 		return ""
 	}
@@ -283,8 +283,8 @@ function createScoreLabel(id) {
 
 // Creates the buttons gamemasters can use to control scores
 function createScoreButton(id) {
-	if(id < teams.length) {
-		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + teams[id].forecol + "; background-color:" + (	(id == scoreid) ? teams[id].selcol : teams[id].backcol) + "\"><h2>" + scoreStr + teams[id].score + "</h2></button>";
+	if(id < playfield.teams.length) {
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>" + scoreStr + playfield.teams[id].score + "</h2></button>";
 	} else {
 		return ""
 	}
