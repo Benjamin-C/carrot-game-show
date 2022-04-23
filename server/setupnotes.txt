@@ -1,0 +1,8 @@
+Tested using Node V17.9.8
+Installed from https://github.com/nodesource/distributions/blob/master/README.md#debinstall
+
+Needed to install
+npm install uuid mysql mime
+
+run with
+node nodeserver.js
