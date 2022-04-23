@@ -134,7 +134,7 @@ function getNewControlTableBox_param(num, used) {
 	}
 	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" onclick=\"";
 	if (used) {
-		txt = txt + "hideans(" + num + ")\"><h3>Hide</h3>";
+		txt = txt + "hideans(" + num + ")\">" + makeHideButton(num);
 	} else {
 		txt = txt + "showans(" + num + ")\"><h3>Answer</h3>";
 	}
@@ -363,6 +363,12 @@ function prepBuild() {
  * ██   ██  ██   ████  ███████   ███ ███   ███████  ██   ██         ████    ██  ███████   ███ ███
  */
 
+function makeHideButton(num) {
+	let ansteam = playfield.questions[num].team;
+	let color = (ansteam >= 0 && ansteam < playfield.teams.length) ? playfield.teams[ansteam].forecol : "white";
+	return "<h3 style=\"color:" + color + "\">Hide<h3>";
+}
+
 // Shows an answer to a question
 function showans(num) {
 	playfield.questions[num].team = scoreid;
@@ -393,7 +399,8 @@ function showans(num) {
 		document.getElementById("ansbtn" + num).onclick = function() {
 			hideans(num)
 		};
-		document.getElementById("ansbtn" + num).innerHTML = "<h3>Hide<h3>";
+
+		document.getElementById("ansbtn" + num).innerHTML = makeHideButton(num);
 
 		playfield.questions[num].used = true;
 		let pts = parseInt(document.getElementById("pts" + num).value);

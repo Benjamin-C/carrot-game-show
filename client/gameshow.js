@@ -94,7 +94,7 @@ function genTeam(name, fore, select, back) {
 // let teamGenCount = 3;
 
 // Team score colors
-let scorecolor = [ ["#ff0000", "#00FF00", "#0000ff", "#FFFF00"], ["#400000", "#004000", "#000080", "#404000"], ["#200000", "#002000", "#000020", "#202000"] ];
+let scorecolor = [ ["#ff0000", "#00FF00", "#0040ff", "#FFFF00"], ["#400000", "#004000", "#002080", "#404000"], ["#200000", "#002000", "#001020", "#202000"] ];
 
 for(let i = 0; i < scorecolor[0].length; i++) {
 	playfield.teams.push(genTeam("", scorecolor[0][i], scorecolor[1][i], scorecolor[2][i]))
