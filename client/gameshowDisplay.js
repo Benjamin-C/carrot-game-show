@@ -231,6 +231,7 @@ function hideScore() {
 function showScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
+	// Calculate the correct team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		playfield.teams[i].score = 0;
 	}
@@ -241,6 +242,7 @@ function showScore() {
 			playfield.teams[t].score += qs;
 		}
 	}
+	// Display the team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
 			cfg += nbsp(4);
@@ -249,6 +251,7 @@ function showScore() {
 		cfg += createScoreButton(i);
 		scb += "<td>" + createScoreLabel(i) + "</td>";
 	}
+	cfg += nbsp(4) + createScoreButton(-1);
 	scb += "</tr></table>";
 	document.getElementById("score").innerHTML = cfg;
 	gamePanel.document.getElementById("score").innerHTML = scb;
@@ -283,10 +286,10 @@ function createScoreLabel(id) {
 
 // Creates the buttons gamemasters can use to control scores
 function createScoreButton(id) {
-	if(id < playfield.teams.length) {
-		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>" + scoreStr + playfield.teams[id].score + "</h2></button>";
+	if(id >= 0 && id < playfield.teams.length) {
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>" + scoreStr + playfield.teams[id].score + "</h2></button><button id=scorebtn-" + id + "\" onclick=\"openTeamMenu(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>&nbsp" + gear + "&nbsp</h2></button>";
 	} else {
-		return ""
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:#FFFFFF; background-color:" + (	(id == scoreid) ? "#444444" : "#222222") + "\"><h2>null</h2></button>";
 	}
 }
 
@@ -496,19 +499,6 @@ function titlechange() {
 	playfield.biganswer = document.getElementById("bigansbox").checked;
 	playfield.squarebox = document.getElementById("squareboxbox").checked;
 	build();
-}
-
-// Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
-function scorechange(dir) {
-	let change = parseInt(document.getElementById("scoremodnum").value);
-	if (dir == 1) {
-		score[scoreid] = score[scoreid] + change;
-	} else if (dir == 0) {
-		score[scoreid] = change;
-	} else if (dir == -1) {
-		score[scoreid] = score[scoreid] - change;
-	}
-	showScore();
 }
 
 /*

@@ -27,7 +27,7 @@ let playerFunc = function() {
 let controlFunc = function() {
 	console.log("Launghing");
 	document.title = "Control BenGameShow";
-	document.getElementById("topnav").innerHTML = "<input id=\"fadebox\" type=\"checkbox\">Fade</input><input type=\"file\" id=\"files\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick some questions\" onclick=\"document.getElementById('files').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Load from cache\" onclick=\"handleCacheSelect()\" />" + " or " + "<input type=\"file\" id=\"videos\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick a video\" onclick=\"document.getElementById('videos').click()\" />" + " or " + "<input type=\"file\" id=\"images\" style=\"display: none;\" /><input  class=\"button\" type=\"button\" value=\"Pick an Image\" onclick=\"document.getElementById('images').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Blank\" onclick=\"prepareBlank()\" />&nbsp&nbsp&nbsp<button onClick=\"openNetworkSettings()\">Online Settings</button>";
+	document.getElementById("topnav").innerHTML = "<input id=\"fadebox\" type=\"checkbox\">Fade</input><input type=\"file\" id=\"files\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick some questions\" onclick=\"document.getElementById('files').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Load from cache\" onclick=\"handleCacheSelect()\" />" + " or " + "<input type=\"file\" id=\"videos\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick a video\" onclick=\"document.getElementById('videos').click()\" />" + " or " + "<input type=\"file\" id=\"images\" style=\"display: none;\" /><input  class=\"button\" type=\"button\" value=\"Pick an Image\" onclick=\"document.getElementById('images').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Blank\" onclick=\"prepareBlank()\" />&nbsp&nbsp&nbsp";//<button onClick=\"openNetworkSettings()\">Online Settings</button>"; Online settings is disabled for now
 	document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	document.getElementById('videos').addEventListener('change', handleVideoSelect, false);
 	document.getElementById('images').addEventListener('change', handleImageSelect, false);
@@ -73,35 +73,6 @@ playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
 playfield.teams = []
-
-// This should probably turn into an array of objects
-// ??? ID of the current team
-let scoreid = 0;
-// Team scores, may soon be depricated
-let score = [0, 0, 0];
-
-function genTeam(name, fore, select, back) {
-	let team = new Object();
-	team.name = name;
-	team.forecol = fore;
-	team.selcol = select;
-	team.backcol = back;
-	team.score = 0;
-	return team;
-}
-
-// let teams = [];
-// let teamGenCount = 3;
-
-// Team score colors
-let scorecolor = [ ["#ff0000", "#00FF00", "#0040ff", "#FFFF00"], ["#400000", "#004000", "#002080", "#404000"], ["#200000", "#002000", "#001020", "#202000"] ];
-
-for(let i = 0; i < scorecolor[0].length; i++) {
-	playfield.teams.push(genTeam("", scorecolor[0][i], scorecolor[1][i], scorecolor[2][i]))
-}
-
-// Score text string. Maybe should be put in a localizatoin something?
-let scoreStr = "Score = ";
 
 // The second screen presentation window
 let gamePanel;
