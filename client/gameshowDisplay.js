@@ -180,8 +180,8 @@ function getAnswerTable(privileged, doc, vsf) {
 // Gets the boxes for the abve table
 function getNewAnswerTableBox_param(num, text, color, hide, boxwidth, boxheight, privileged) {
 	privileged = (privileged === undefined) ? true : privileged;
-	console.log(privileged);
-	console.log(playfield.questions[num]);
+	// console.log(privileged);
+	// console.log(playfield.questions[num]);
 	let txt = "<td id=\"box" + num + "\" class=\"";
 	if (color) {
 		txt = txt + "used";
@@ -231,16 +231,8 @@ function showScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
 	// Calculate the correct team scores
-	for(let i = 0; i < playfield.teams.length; i++) {
-		playfield.teams[i].score = 0;
-	}
-	for(let i = 0; i < playfield.questions.length; i++) {
-		let t = playfield.questions[i].team;
-		let qs = playfield.questions[i].points;
-		if(t >= 0 && t < playfield.teams.length) {
-			playfield.teams[t].score += qs;
-		}
-	}
+	calcTeamPoints();
+	console.log(playfield.teams);
 	// Display the team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {

@@ -9,6 +9,8 @@ function genTeam(name, fore, select, back) {
 	team.selcol = select;
 	team.backcol = back;
 	team.score = 0;
+	team.scoreAdj = 0;
+	team.events = [];
 	return team;
 }
 
@@ -30,14 +32,18 @@ function addTeam() {
 let gear = '\u2699';
 
 // Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
-function scorechange(dir) {
-	let change = parseInt(document.getElementById("scoremodnum").value);
+function scorechange(teamnum, dir) {
+	let change = parseInt(document.getElementById("scoremodnum" + teamnum).value);
+	let team = playfield.teams[teamnum];
+	if(team.scoreAdj === undefined) {
+		team.scoreAdj = 0;
+	}
 	if (dir == 1) {
-		score[scoreid] = score[scoreid] + change;
+		team.scoreAdj += change;
 	} else if (dir == 0) {
-		score[scoreid] = change;
+		team.scoreAdj = change;
 	} else if (dir == -1) {
-		score[scoreid] = score[scoreid] - change;
+		team.scoreAdj += change;
 	}
 	showScore();
 }
@@ -57,22 +63,21 @@ function genTeamMenuInnards(teamnum) {
 	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
 	text += '  <div class="padded">';
 
-	text += '<div id="scoremoddiv"><input id="scoremodnum" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button></div>';
+	// Score changing values
+	text += '<div id="scoremoddiv"><input id="scoremodnum' + teamnum + '" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', -1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button></div>';
 
-	text += '<br/><div id="teamhistorydiv" style="height:200px;overflow:auto">';
-
-	text += '<table style="width:100%;border-collapse: collapse;">';
-
-	for(let i = 0; i < 18; i++) {
-		text += '<tr style="border: 2px solid ' + team.backcol + '">';
-		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi where you' +   '</h3></div></td>';
-		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 2' +           '</h3></div></td>';
-		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 3' +           '</h3></div></td>';
-		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>My num is ' + i + '</h3></div></td>';
-		text += '</tr>';
-	}
-
-	text += '</table></div>';
+	// Scrolling list code that should go somewhere else later
+	// text += '<br/><div id="teamhistorydiv" style="height:200px;overflow:auto">';
+	// text += '<table style="width:100%;border-collapse: collapse;">';
+	// for(let i = 0; i < 18; i++) {
+	// 	text += '<tr style="border: 2px solid ' + team.backcol + '">';
+	// 	text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi where you' +   '</h3></div></td>';
+	// 	text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 2' +           '</h3></div></td>';
+	// 	text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 3' +           '</h3></div></td>';
+	// 	text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>My num is ' + i + '</h3></div></td>';
+	// 	text += '</tr>';
+	// }
+	// text += '</table></div>';
 
 	text += '</div>';
 
@@ -98,4 +103,24 @@ function openTeamMenu(teamnum) {
 function closeTeamMenu() {
 	openTeamMenuNum = -1;
 	document.getElementById("floatingbox").innerHTML = '';
+}
+
+// Updates each team's score variable to the correct value
+function calcTeamPoints() {
+	console.log("Calculating points ...");
+	let teams = playfield.teams;
+	let qs = playfield.questions;
+	for(let i = 0; i < teams.length; i++) {
+		if(teams[i].scoreAdj === undefined) {
+			teams[i].scoreAdj = 0;
+		}
+		teams[i].score = teams[i].scoreAdj;
+	}
+	for(let i = 0; i < qs.length; i++) {
+		let t = qs[i].team;
+		let qpt = qs[i].points;
+		if(t >= 0 && t < teams.length) {
+			teams[t].score += qpt;
+		}
+	}
 }
