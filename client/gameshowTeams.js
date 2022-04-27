@@ -52,15 +52,27 @@ function updateTeamMenuInnards() {
 
 function genTeamMenuInnards(teamnum) {
 	let team = playfield.teams[teamnum];
-	console.log(scoreid);
-	console.log(teamnum);
-	console.log(scoreid == teamnum);
 	let text = "";
 	text += '<div id="teamsettingsheader" class="movable-header" style="background-color:' + ((scoreid == teamnum) ? team.selcol : team.backcol) + '; color:' + team.forecol + '">' + nbsp(0) + 'Team ' + teamnum + ' Config' + nbsp(0) + '<button onclick="closeTeamMenu()" class="xitbtn">X</button></div>';
 	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
 	text += '  <div class="padded">';
 
-	text += '<input id="scoremodnum" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button>';
+	text += '<div id="scoremoddiv"><input id="scoremodnum" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button></div>';
+
+	text += '<br/><div id="teamhistorydiv" style="height:200px;overflow:auto">';
+
+	text += '<table style="width:100%;border-collapse: collapse;">';
+
+	for(let i = 0; i < 18; i++) {
+		text += '<tr style="border: 2px solid ' + team.backcol + '">';
+		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi where you' +   '</h3></div></td>';
+		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 2' +           '</h3></div></td>';
+		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>Hi 3' +           '</h3></div></td>';
+		text += '<td><div style="overflow: auto;white-space: nowrap;"><h3>My num is ' + i + '</h3></div></td>';
+		text += '</tr>';
+	}
+
+	text += '</table></div>';
 
 	text += '</div>';
 
