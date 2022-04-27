@@ -119,8 +119,24 @@ function calcTeamPoints() {
 	for(let i = 0; i < qs.length; i++) {
 		let t = qs[i].team;
 		let qpt = qs[i].points;
-		if(t >= 0 && t < teams.length) {
+		if(t >= 0 && t < teams.length && qs[i].givesPoints !== false) {
 			teams[t].score += qpt;
 		}
 	}
+}
+
+function removeTeamQuestions(teamnum) {
+	if(isValidTeamNum(teamnum)) {
+		let qs = playfield.questions;
+		for(let i = 0; i < pl.length; i++) {
+			let t = qs[i].team;
+			if(t == teamnum) {
+				qs[i].givesPoints = false;
+			}
+		}
+	}
+}
+
+function isValidTeamNum(teamnum) {
+	return teamnum >= 0 && teamnum < playfield.teams.length;
 }
