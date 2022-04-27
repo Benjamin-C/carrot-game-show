@@ -42,15 +42,41 @@ function scorechange(dir) {
 	showScore();
 }
 
-function openTeamMenu(teamnum) {
+let openTeamMenuNum = -1;
+
+function updateTeamMenuInnards() {
+	if(openTeamMenuNum >= 0) {
+		document.getElementById("teamsettings").innerHTML = genTeamMenuInnards(openTeamMenuNum);
+	}
+}
+
+function genTeamMenuInnards(teamnum) {
 	let team = playfield.teams[teamnum];
+	console.log(scoreid);
+	console.log(teamnum);
+	console.log(scoreid == teamnum);
+	let text = "";
+	text += '<div id="teamsettingsheader" class="movable-header" style="background-color:' + ((scoreid == teamnum) ? team.selcol : team.backcol) + '; color:' + team.forecol + '">' + nbsp(0) + 'Team ' + teamnum + ' Config' + nbsp(0) + '<button onclick="closeTeamMenu()" class="xitbtn">X</button></div>';
+	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
+	text += '  <div class="padded">';
+
+	text += '<input id="scoremodnum" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button>';
+
+	text += '</div>';
+
+	return text;
+}
+
+function openTeamMenu(teamnum) {
+	openTeamMenuNum = teamnum;
+
   let text = '';
+	// Make a floating window that the gamemaster can move around to their liking
   text += '<div id="teamsettings" class="movable">';
-  text += '  <div id="teamsettingsheader" class="movable-header" style="background-color:' + team.selcol + '; color:' + team.forecol + '">Team ' + teamnum + ' Config <button onclick="closeTeamMenu()" class="xitbtn">X</button></div>';
-  text += '  <div class="padded"><table id="teamsettingsbody" class="settingsbodytable">';
-  text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.setOnline(' + ((netman.online) ? 'false' : 'true') + ')">' + ((netman.online) ? 'End' : 'Start new') + ' online game</button></td></tr>';
-  text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="">List online games</button></td></tr>';
-  text += '</table></div></div>';
+	// Title bar
+	text += genTeamMenuInnards(teamnum);
+	// popup div
+	text += '</div>';
   console.log("Opening net settings");
   document.getElementById("floatingbox").innerHTML = text;
   dragElement(document.getElementById("teamsettings"));
@@ -58,5 +84,6 @@ function openTeamMenu(teamnum) {
 
 // Close the network settings dialog
 function closeTeamMenu() {
+	openTeamMenuNum = -1;
 	document.getElementById("floatingbox").innerHTML = '';
 }

@@ -76,7 +76,6 @@ function build() {
 			squareboxstr = "checked=\"" + "true" + "\"";
 		}
 		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\">Config Color</input><table class=\"gametable\">";
-		document.getElementById("scoremod").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;<input id=\"scoremodnum\" class=\"numbox\" type=\"text\" value=\"0\"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button>";
 		for (let i = 0; i < playfield.height; i++) {
 			tbl = tbl + "<tr>";
 			for (let j = 0; j < playfield.width; j++) {
@@ -255,6 +254,7 @@ function showScore() {
 	scb += "</tr></table>";
 	document.getElementById("score").innerHTML = cfg;
 	gamePanel.document.getElementById("score").innerHTML = scb;
+	updateTeamMenuInnards();
 }
 
 // Gets a number of nonbreaking spaces
