@@ -145,8 +145,9 @@ function savejson(silent) {
 	// }
 	let injson = makeSavefile(saveToObj());
 	if(silent === undefined || !silent) {
-		console.log(injson);
-		alert("Find the JSON in the console");
+		// console.log(injson);
+		// alert("Find the JSON in the console");
+		download("questions.json", injson);
 	}
 	return injson;
 }
@@ -154,6 +155,19 @@ function savejson(silent) {
 // Saves a copy of the game to a cookie
 function cacheGame() {
 	setCookie(backup_name, savejson(true), 1);
+}
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
 }
 
 /*
