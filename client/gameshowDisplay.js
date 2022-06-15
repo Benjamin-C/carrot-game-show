@@ -76,7 +76,6 @@ function build() {
 			squareboxstr = "checked=\"" + "true" + "\"";
 		}
 		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\">Config Color</input><table class=\"gametable\">";
-		document.getElementById("scoremod").innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;<input id=\"scoremodnum\" class=\"numbox\" type=\"text\" value=\"0\"/>&nbsp;<button onclick=\"scorechange(1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(-1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button>";
 		for (let i = 0; i < playfield.height; i++) {
 			tbl = tbl + "<tr>";
 			for (let j = 0; j < playfield.width; j++) {
@@ -86,7 +85,7 @@ function build() {
 		}
 		tbl = tbl + "</table>";
 		document.getElementById("table").innerHTML = tbl;
-		let ctlhtml = "<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
+		let ctlhtml = "<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
 		ctlhtml = ctlhtml + "<button onclick=\"showXr()\"><h1 style=\"color:#FF0080\">R</h1></button><button id=\"xtb0\" onclick=\"showX(0)\"><h1 style=\"color:#FF0000\">&nbsp&nbsp</h1></button><button id=\"xtb1\" onclick=\"showX(1)\" style=\"background-color:#808080\"><h1 style=\"color:#FF0000\">X</h1></button><button id=\"xtb2\" onclick=\"showX(2)\"><h1 style=\"color:#FF0000\">XX</h1></button><button id=\"xtb3\" onclick=\"showX(3)\"><h1 style=\"color:#FF0000\">XXX</h1></button>";
 		document.getElementById("control").innerHTML = ctlhtml;
 
@@ -118,7 +117,11 @@ function setShowColorConfig() {
 function getNewControlTableBox_param(num, used) {
 	let showscorevalue = "";
 	if (playfield.questions[num].showscore) {
-		showscorevalue = "checked=\"" + "false" + "\"";
+		showscorevalue = "checked";
+	}
+	let showteamvalue = "";
+	if (playfield.questions[num].showteam) {
+		showteamvalue = "checked";
 	}
 	let txt = "<td id=\"box" + num + "\" class=\""
 	txt = txt + "gametd"
@@ -134,11 +137,11 @@ function getNewControlTableBox_param(num, used) {
 	}
 	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" onclick=\"";
 	if (used) {
-		txt = txt + "hideans(" + num + ")\"><h3>Hide</h3>";
+		txt = txt + "hideans(" + num + ")\">" + makeHideButton(num);
 	} else {
 		txt = txt + "showans(" + num + ")\"><h3>Answer</h3>";
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"update(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><br/>";
+	txt = txt + "</button>&nbsp;<button onclick=\"update(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
 	txt = txt + "<div id=\"box" + num + "color\" style=\"display:none\">Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/></td></div>"
 
 	return txt;
@@ -178,40 +181,59 @@ function getAnswerTable(privileged, doc, vsf) {
 	return tbl;
 }
 
-// Gets the boxes for the abve table
-function getNewAnswerTableBox_param(num, text, color, hide, boxwidth, boxheight, privileged) {
-	privileged = (privileged === undefined) ? true : privileged;
-	console.log(privileged);
-	console.log(playfield.questions[num]);
-	let txt = "<td id=\"box" + num + "\" class=\"";
-	if (color) {
-		txt = txt + "used";
+// Gets the text to show in the box. num is the question num. Not sure what the commented stuff is meant to do
+function genAnswerTableBoxText(num) {//, showans, hide, privileged) {
+	let txt = '<h1>';
+	// if(privileged) {
+		// if (!hide) {
+	if (playfield.questions[num].used) {
+		txt = txt + playfield.questions[num].answer;
+		if(playfield.questions[num].showscore == true) {
+			let team = playfield.questions[num].team;
+			console.log(team);
+			if(playfield.questions[num].showteam == true && isValidTeamNum(team)) {
+				txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + playfield.questions[num].points + ']</span>';
+				// txt += playfield.teams[team].forecol
+				console.log(txt);
+			} else {
+				txt += " [" + playfield.questions[num].points + "]"
+				console.log(txt);
+			}
+			console.log('Score' + num);
+		} else {
+			console.log('No score' + num);
+		}
 	} else {
-		txt = txt + "gametd";
+		txt = txt + playfield.questions[num].question;
+	}
+	txt += '</h1>';
+		// }
+	// } else {
+		// txt += playfield.questions[num].text;
+	// }
+	return txt;
+}
+
+// Gets the boxes for the abve table
+function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheight, privileged) {
+	privileged = (privileged === undefined) ? true : privileged;
+	// console.log(privileged);
+	// console.log(playfield.questions[num]);
+	let txt = "<td id=\"box" + num + "\" class=\"gametd";
+	if (isqused) {
+		txt += " used";
 	}
 	txt = txt + "\" width=" + boxwidth + " height=" + boxheight + " style=\"background-color:#";
 	if(privileged) {
-		if (color) {
-			txt = txt + playfield.questions[num].usedcolor;
+		if (isqused) {
+			txt += playfield.questions[num].usedcolor;
 		} else {
-			txt = txt + playfield.questions[num].unusedcolor;
+			txt += playfield.questions[num].unusedcolor;
 		}
 	} else {
 		txt += playfield.questions[num].color;
 	}
-	txt = txt + "\"><h1 id=\"text" + num + "\">";
-	if(privileged) {
-		if (!hide) {
-			if (text) {
-				txt = txt + playfield.questions[num].answer;
-			} else {
-				txt = txt + playfield.questions[num].question;
-			}
-		}
-	} else {
-		txt += playfield.questions[num].text;
-	}
-	txt = txt + "</h1></td>";
+	txt += "\">" + genAnswerTableBoxText(num, text, hide, privileged) + "</td>";
 	return txt;
 }
 
@@ -231,17 +253,24 @@ function hideScore() {
 function showScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
-	for(let i = 0; i < score.length; i++) {
+	// Calculate the correct team scores
+	calcTeamPoints();
+	console.log(playfield.teams);
+	// Display the team scores
+	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
-			cfg += nbsp(4);
+			cfg += nbsp(1);
 			scb += "<td>" + "</td>";
 		}
 		cfg += createScoreButton(i);
 		scb += "<td>" + createScoreLabel(i) + "</td>";
 	}
+	cfg += nbsp(1) + createScoreButton(-1);
+	cfg += nbsp(1) + '<button id="scoreadd" onclick="addNewTeam()" style="color:#FFFFFF; background-color:#222222"><h2>+</h2></button>';
 	scb += "</tr></table>";
 	document.getElementById("score").innerHTML = cfg;
 	gamePanel.document.getElementById("score").innerHTML = scb;
+	updateTeamMenuInnards();
 }
 
 // Gets a number of nonbreaking spaces
@@ -263,14 +292,21 @@ function getBackgroundColor() {
 
 // Creates the score display sections
 function createScoreLabel(id) {
-	// return "<p style=\"color:" + scorecolor[0][id] + ";background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\>" + scoreStr + score[id] + "</p>";
-	// return scoreStr + score[id];
-	return "<h1 style=\"border:" + ((id == scoreid) ? scorecolor[0][id] : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + scorecolor[0][id] + "\">&nbsp" + scoreStr + score[id] + "&nbsp</h1>";
+	if(id < playfield.teams.length) {
+		return "<h1 style=\"border:" + ((id == scoreid) ? playfield.teams[id].forecol : getBackgroundColor()) + "; border-width:5px; border-style:solid; color:" + playfield.teams[id].forecol + "\">&nbsp" + scoreStr + playfield.teams[id].score + "&nbsp</h1>";
+	} else {
+		return ""
+	}
+
 }
 
 // Creates the buttons gamemasters can use to control scores
 function createScoreButton(id) {
-	return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + scorecolor[0][id] + "; background-color:" + scorecolor[(id == scoreid) ? 1 : 2][id] + "\"><h2>" + scoreStr + score[id] + "</h2></button>";
+	if(id >= 0 && id < playfield.teams.length) {
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>" + scoreStr + playfield.teams[id].score + "</h2></button><button id=scorebtn-" + id + "\" onclick=\"openTeamMenu(" + id + ")\" style=\"color:" + playfield.teams[id].forecol + "; background-color:" + (	(id == scoreid) ? playfield.teams[id].selcol : playfield.teams[id].backcol) + "\"><h2>&nbsp" + gear + "&nbsp</h2></button>";
+	} else {
+		return "<button id=\"scoreid-" + id + "\" onclick=\"setScoreID(" + id + ")\" style=\"color:#FFFFFF; background-color:" + (	(id == scoreid) ? "#444444" : "#222222") + "\"><h2>null</h2></button>";
+	}
 }
 
 // Sets the currently selected Team
@@ -346,9 +382,16 @@ function prepBuild() {
  * ██   ██  ██   ████  ███████   ███ ███   ███████  ██   ██         ████    ██  ███████   ███ ███
  */
 
+function makeHideButton(num) {
+	let ansteam = playfield.questions[num].team;
+	let color = (ansteam >= 0 && ansteam < playfield.teams.length) ? playfield.teams[ansteam].forecol : "white";
+	return "<h3 style=\"color:" + color + "\">Hide<h3>";
+}
+
 // Shows an answer to a question
 function showans(num) {
-	if (playfield.biganswer) {
+	playfield.questions[num].team = scoreid;
+	if (playfield.biganswer) { // This does not seem to work
 		// myMode = MyModes.ANS;
 		document.getElementById("ansbtn" + num).onclick = function() {
 			doneans(num); // Call doneans to clean up large answers
@@ -375,11 +418,12 @@ function showans(num) {
 		document.getElementById("ansbtn" + num).onclick = function() {
 			hideans(num)
 		};
-		document.getElementById("ansbtn" + num).innerHTML = "<h3>Hide<h3>";
+
+		document.getElementById("ansbtn" + num).innerHTML = makeHideButton(num);
 
 		playfield.questions[num].used = true;
 		let pts = parseInt(document.getElementById("pts" + num).value);
-		score[scoreid] = score[scoreid] + pts;
+		// score[scoreid] = score[scoreid] + pts;
 
 		update(num);
 		// document.getElementById("box" + num).className = "used";
@@ -419,6 +463,7 @@ function hideans(num) {
 	};
 	document.getElementById("ansbtn" + num).innerHTML = "<h3>Answer</h3>";
 	playfield.questions[num].used = false;
+	playfield.questions[num].team = -1;
 	let pts = parseInt(document.getElementById("pts" + num).value);
 	score[scoreid] = score[scoreid] - pts;
 	showScore();
@@ -440,24 +485,23 @@ function update(num) {
 	let question = makejobject(num, playfield.questions[num]);
 
 	let used = !(question.used == null || question.used == false);
+	document.getElementById("box" + num).className = "gametd";
+	gamePanel.document.getElementById("box" + num).className = "gametd";
+
 	if (used) {
 		document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
 		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
-		document.getElementById("box" + num).classList.add(used);
-		gamePanel.document.getElementById("box" + num).classList.add(used);
-
-		let newval = "<h1>" + question.answer + ((question.showscore == true) ? " [" + question.points + "]" : "")  + "</h1>";
-		gamePanel.document.getElementById("box" + num).innerHTML = newval;
+		document.getElementById("box" + num).classList.add("used");
+		gamePanel.document.getElementById("box" + num).classList.add("used");
 		console.log("used");
 	} else {
 		document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
 		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
-		document.getElementById("box" + num).className = "gametd";
-		gamePanel.document.getElementById("box" + num).className = "gametd";
 
-		gamePanel.document.getElementById("box" + num).innerHTML = "<h1>" + question.question + "</h1>";
 		console.log("Unused");
 	}
+
+	gamePanel.document.getElementById("box" + num).innerHTML =  genAnswerTableBoxText(num, true, false, true);
 
 	netman.updateCell(num);
 
@@ -470,19 +514,6 @@ function titlechange() {
 	playfield.biganswer = document.getElementById("bigansbox").checked;
 	playfield.squarebox = document.getElementById("squareboxbox").checked;
 	build();
-}
-
-// Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
-function scorechange(dir) {
-	let change = parseInt(document.getElementById("scoremodnum").value);
-	if (dir == 1) {
-		score[scoreid] = score[scoreid] + change;
-	} else if (dir == 0) {
-		score[scoreid] = change;
-	} else if (dir == -1) {
-		score[scoreid] = score[scoreid] - change;
-	}
-	showScore();
 }
 
 /*

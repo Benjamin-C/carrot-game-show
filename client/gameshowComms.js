@@ -17,13 +17,13 @@ function openNetworkSettings() {
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="">List online games</button></td></tr>';
 	text += '</table></div></div>';
 	console.log("Opening net settings");
-	document.getElementById("netset").innerHTML = text;
+	document.getElementById("floatingbox").innerHTML = text;
 	dragElement(document.getElementById("netsettings"));
 }
 
 // Close the network settings dialog
 function closeNetworkSettings() {
-	document.getElementById("netset").innerHTML = '';
+	document.getElementById("floatingbox").innerHTML = '';
 }
 
 // The class to manage networking

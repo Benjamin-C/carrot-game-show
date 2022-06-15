@@ -9,6 +9,7 @@
     margin: auto;
     overflow: auto;
 }
+/* Not sure quite what this does, but it does more than just center some text */ 
 .center {
   margin: 0;
   position: absolute;
