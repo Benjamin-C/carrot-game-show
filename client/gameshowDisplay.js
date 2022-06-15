@@ -236,13 +236,14 @@ function showScore() {
 	// Display the team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
-			cfg += nbsp(4);
+			cfg += nbsp(1);
 			scb += "<td>" + "</td>";
 		}
 		cfg += createScoreButton(i);
 		scb += "<td>" + createScoreLabel(i) + "</td>";
 	}
-	cfg += nbsp(4) + createScoreButton(-1);
+	cfg += nbsp(1) + createScoreButton(-1);
+	cfg += nbsp(1) + '<button id="scoreadd" onclick="addNewTeam()" style="color:#FFFFFF; background-color:#222222"><h2>+</h2></button>';
 	scb += "</tr></table>";
 	document.getElementById("score").innerHTML = cfg;
 	gamePanel.document.getElementById("score").innerHTML = scb;

@@ -31,6 +31,11 @@ function addTeam() {
 
 let gear = '\u2699';
 
+function addNewTeam() {
+	playfield.teams.push(genTeam("", "FFFFFF", "#888888", "#444444"));
+	showScore();
+}
+
 // Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
 function scorechange(teamnum, dir) {
 	let change = parseInt(document.getElementById("scoremodnum" + teamnum).value);
@@ -64,7 +69,19 @@ function genTeamMenuInnards(teamnum) {
 	text += '  <div class="padded">';
 
 	// Score changing values
-	text += '<div id="scoremoddiv"><input id="scoremodnum' + teamnum + '" maxlength="3" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', -1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button></div>';
+	text += '<div id="scoremoddiv">Score: ' + team.score + nbsp(2) + '<input id="scoremodnum' + teamnum + '" type="text" value="0"/>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 1)\"><h3>&nbsp;&nbsp;+&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', -1)\"><h3>&nbsp;&nbsp;-&nbsp;&nbsp;</h3></button>&nbsp;<button onclick=\"scorechange(' + teamnum + ', 0)\"><h3>&nbsp;&nbsp;S&nbsp;&nbsp;</h3></button></div>';
+
+	// Color stuff
+	text += '<div id="teamcolordiv"><center><table>'
+	text += '<tr><td><label for="teamforecol">Foreground Color:</label></td><td><input id="teamforecol' + teamnum + '" style="width:4em" maxlength="6" type="text" value="' + team.forecol.substring(1) + '"/></td></tr>'
+	text += '<tr><td><label for="teamselcol">Selected Color:</label></td><td><input id="teamselcol'  + teamnum + '" style="width:4em" maxlength="6" type="text" value="' + team.selcol.substring(1) + '"/></td></tr>'
+	text += '<tr><td><label for="teambackcol">Background Color:</label></td><td><input id="teambackcol' + teamnum + '" style="width:4em" maxlength="6" type="text" value="' + team.backcol.substring(1) + '"/></td></tr>'
+	text += '</table></center></div>';
+
+	text += '<div id="teamctlbuttons"><center>';
+	text += '<button onclick=\"updateColors()\">Update colors</button>' + nbsp(2);
+	text += '<button onclick=\"removeTeam(' + teamnum + ')\">Delete Team</button>';// + nbsp(2);
+	text += '</center></div>'
 
 	// Scrolling list code that should go somewhere else later
 	// text += '<br/><div id="teamhistorydiv" style="height:200px;overflow:auto">';
@@ -94,12 +111,12 @@ function openTeamMenu(teamnum) {
 	text += genTeamMenuInnards(teamnum);
 	// popup div
 	text += '</div>';
-  console.log("Opening net settings");
+  console.log("Opening team " + teamnum + " settings");
   document.getElementById("floatingbox").innerHTML = text;
   dragElement(document.getElementById("teamsettings"));
 }
 
-// Close the network settings dialog
+// Close the team settings dialog
 function closeTeamMenu() {
 	openTeamMenuNum = -1;
 	document.getElementById("floatingbox").innerHTML = '';
@@ -139,4 +156,33 @@ function removeTeamQuestions(teamnum) {
 
 function isValidTeamNum(teamnum) {
 	return teamnum >= 0 && teamnum < playfield.teams.length;
+}
+
+function updateColors() {
+	console.log("Updating colors ... ")
+	// let playfield.teams = playfield.teams;
+	for(let i = 0; i < playfield.teams.length; i++) { // teamselcol2
+		box = document.getElementById('teamselcol' + i);
+		if(box != undefined) {
+			playfield.teams[i].selcol  = '#' + document.getElementById('teamselcol'  + i).value;
+			playfield.teams[i].forecol = '#' + document.getElementById('teamforecol' + i).value;
+			playfield.teams[i].backcol = '#' + document.getElementById('teambackcol' + i).value;
+		}
+	}
+	showScore();
+}
+
+function removeTeam(id, confirmedRemove) {
+	if(confirmedRemove === undefined) {
+		// Open confirm dialog
+		removeTeam(id, confirm('Are you sure you want to remove Team ' + id + '?. This can not be undone.'));
+	} else if(confirmedRemove === true) {
+		// Delete the team
+		playfield.teams.splice(id, 1);
+		closeTeamMenu();
+		showScore();
+	} else {
+		// Don't delete the team
+		console.log("Team not deleted")
+	}
 }
