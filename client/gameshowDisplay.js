@@ -85,7 +85,7 @@ function build() {
 		}
 		tbl = tbl + "</table>";
 		document.getElementById("table").innerHTML = tbl;
-		let ctlhtml = "<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
+		let ctlhtml = "<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
 		ctlhtml = ctlhtml + "<button onclick=\"showXr()\"><h1 style=\"color:#FF0080\">R</h1></button><button id=\"xtb0\" onclick=\"showX(0)\"><h1 style=\"color:#FF0000\">&nbsp&nbsp</h1></button><button id=\"xtb1\" onclick=\"showX(1)\" style=\"background-color:#808080\"><h1 style=\"color:#FF0000\">X</h1></button><button id=\"xtb2\" onclick=\"showX(2)\"><h1 style=\"color:#FF0000\">XX</h1></button><button id=\"xtb3\" onclick=\"showX(3)\"><h1 style=\"color:#FF0000\">XXX</h1></button>";
 		document.getElementById("control").innerHTML = ctlhtml;
 
@@ -117,7 +117,11 @@ function setShowColorConfig() {
 function getNewControlTableBox_param(num, used) {
 	let showscorevalue = "";
 	if (playfield.questions[num].showscore) {
-		showscorevalue = "checked=\"" + "false" + "\"";
+		showscorevalue = "checked";
+	}
+	let showteamvalue = "";
+	if (playfield.questions[num].showteam) {
+		showteamvalue = "checked";
 	}
 	let txt = "<td id=\"box" + num + "\" class=\""
 	txt = txt + "gametd"
@@ -137,7 +141,7 @@ function getNewControlTableBox_param(num, used) {
 	} else {
 		txt = txt + "showans(" + num + ")\"><h3>Answer</h3>";
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"update(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><br/>";
+	txt = txt + "</button>&nbsp;<button onclick=\"update(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
 	txt = txt + "<div id=\"box" + num + "color\" style=\"display:none\">Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/></td></div>"
 
 	return txt;
@@ -177,40 +181,59 @@ function getAnswerTable(privileged, doc, vsf) {
 	return tbl;
 }
 
+// Gets the text to show in the box. num is the question num. Not sure what the commented stuff is meant to do
+function genAnswerTableBoxText(num) {//, showans, hide, privileged) {
+	let txt = '<h1>';
+	// if(privileged) {
+		// if (!hide) {
+	if (playfield.questions[num].used) {
+		txt = txt + playfield.questions[num].answer;
+		if(playfield.questions[num].showscore == true) {
+			let team = playfield.questions[num].team;
+			console.log(team);
+			if(playfield.questions[num].showteam == true && isValidTeamNum(team)) {
+				txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + playfield.questions[num].points + ']</span>';
+				// txt += playfield.teams[team].forecol
+				console.log(txt);
+			} else {
+				txt += " [" + playfield.questions[num].points + "]"
+				console.log(txt);
+			}
+			console.log('Score' + num);
+		} else {
+			console.log('No score' + num);
+		}
+	} else {
+		txt = txt + playfield.questions[num].question;
+	}
+	txt += '</h1>';
+		// }
+	// } else {
+		// txt += playfield.questions[num].text;
+	// }
+	return txt;
+}
+
 // Gets the boxes for the abve table
-function getNewAnswerTableBox_param(num, text, color, hide, boxwidth, boxheight, privileged) {
+function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheight, privileged) {
 	privileged = (privileged === undefined) ? true : privileged;
 	// console.log(privileged);
 	// console.log(playfield.questions[num]);
-	let txt = "<td id=\"box" + num + "\" class=\"";
-	if (color) {
-		txt = txt + "used";
-	} else {
-		txt = txt + "gametd";
+	let txt = "<td id=\"box" + num + "\" class=\"gametd";
+	if (isqused) {
+		txt += " used";
 	}
 	txt = txt + "\" width=" + boxwidth + " height=" + boxheight + " style=\"background-color:#";
 	if(privileged) {
-		if (color) {
-			txt = txt + playfield.questions[num].usedcolor;
+		if (isqused) {
+			txt += playfield.questions[num].usedcolor;
 		} else {
-			txt = txt + playfield.questions[num].unusedcolor;
+			txt += playfield.questions[num].unusedcolor;
 		}
 	} else {
 		txt += playfield.questions[num].color;
 	}
-	txt = txt + "\"><h1 id=\"text" + num + "\">";
-	if(privileged) {
-		if (!hide) {
-			if (text) {
-				txt = txt + playfield.questions[num].answer;
-			} else {
-				txt = txt + playfield.questions[num].question;
-			}
-		}
-	} else {
-		txt += playfield.questions[num].text;
-	}
-	txt = txt + "</h1></td>";
+	txt += "\">" + genAnswerTableBoxText(num, text, hide, privileged) + "</td>";
 	return txt;
 }
 
@@ -462,24 +485,23 @@ function update(num) {
 	let question = makejobject(num, playfield.questions[num]);
 
 	let used = !(question.used == null || question.used == false);
+	document.getElementById("box" + num).className = "gametd";
+	gamePanel.document.getElementById("box" + num).className = "gametd";
+
 	if (used) {
 		document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
 		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
-		document.getElementById("box" + num).classList.add(used);
-		gamePanel.document.getElementById("box" + num).classList.add(used);
-
-		let newval = "<h1>" + question.answer + ((question.showscore == true) ? " [" + question.points + "]" : "")  + "</h1>";
-		gamePanel.document.getElementById("box" + num).innerHTML = newval;
+		document.getElementById("box" + num).classList.add("used");
+		gamePanel.document.getElementById("box" + num).classList.add("used");
 		console.log("used");
 	} else {
 		document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
 		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
-		document.getElementById("box" + num).className = "gametd";
-		gamePanel.document.getElementById("box" + num).className = "gametd";
 
-		gamePanel.document.getElementById("box" + num).innerHTML = "<h1>" + question.question + "</h1>";
 		console.log("Unused");
 	}
+
+	gamePanel.document.getElementById("box" + num).innerHTML =  genAnswerTableBoxText(num, true, false, true);
 
 	netman.updateCell(num);
 

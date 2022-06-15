@@ -180,8 +180,15 @@ function removeTeam(id, confirmedRemove) {
 	} else if(confirmedRemove === true) {
 		// Delete the team
 		playfield.teams.splice(id, 1);
+		for(let i = 0; i < playfield.questions.length; i++) {
+			if(playfield.questions[i].team == id) {
+				playfield.questions[i].team = -1
+			} else if(playfield.questions[i].team >= id) {
+				playfield.questions[i].team--;
+			}
+		}
 		closeTeamMenu();
-		showScore();
+		build();
 	} else {
 		// Don't delete the team
 		console.log("Team not deleted")

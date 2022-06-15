@@ -76,11 +76,11 @@ function loadjson(json) {
 						case 4: {
 							console.log("Q version 4");
 							if(indata.length >= 3 && indata[2] !== undefined) {
-								console.log(json);
+								// console.log(json);
 								let str = json.substring(json.indexOf("#")+1);
-								console.log(str);
+								// console.log(str);
 								str = str.substring(str.indexOf("#")+1)
-								console.log(str);
+								// console.log(str);
 								let save = JSON.parse(str);
 								if(save.width !== undefined && save.height !== undefined && save.biganswer !== undefined && save.squarebox !== undefined && save.title !== undefined && save.questions !== undefined) {
 									playfield = save;
@@ -123,6 +123,7 @@ function makejobject(i, o) {
 	obj.usedcolor = document.getElementById('cold' + i).value;
 	obj.question = document.getElementById('ques' + i).value;
 	obj.showscore = document.getElementById('dosc' + i).checked;
+	obj.showteam = document.getElementById('dotm' + i).checked;
 	return obj;
 }
 
