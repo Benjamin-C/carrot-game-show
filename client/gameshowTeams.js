@@ -58,6 +58,7 @@ let openTeamMenuNum = -1;
 function updateTeamMenuInnards() {
 	if(openTeamMenuNum >= 0) {
 		document.getElementById("teamsettings").innerHTML = genTeamMenuInnards(openTeamMenuNum);
+		dragElement(document.getElementById("teamsettings"))
 	}
 }
 
