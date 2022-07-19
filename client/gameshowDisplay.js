@@ -194,6 +194,7 @@ function getNewControlTableBox_param(num, used) {
 	txt += makeConfigCheckbox("dosc", num, playfield.questions[num].showScore, "Show Score");
 	txt += "</tr><tr>";
 	txt += makeConfigCheckbox("dotr", num, playfield.questions[num].randomizable, "Randomizable");
+	txt += makeConfigCheckbox("doti", num, playfield.questions[num].isGraphic, "Graphics");
 	txt += "</tr></table></center>";
 	txt += "Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>";
 	txt += "Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/><br/>"
@@ -238,36 +239,39 @@ function getAnswerTable(privileged, doc, vsf) {
 }
 
 // Gets the text to show in the box. num is the question num. Not sure what the commented stuff is meant to do
-function genAnswerTableBoxText(num) {//, showans, hide, privileged) {
-	let txt = '<h1 id=text' + num + '>';
+function genAnswerTableBoxText(num, boxwidth, boxheight) {//, showans, hide, privileged) {
+	let rtxt = '<h1 id=text' + num + '>';
 	// if(privileged) {
 		// if (!hide) {
-	if (playfield.questions[num].used) {
-		txt = txt + playfield.questions[num].answer;
-		if(playfield.questions[num].showScore == true) {
-			let team = playfield.questions[num].team;
-			console.log(team);
-			if(playfield.questions[num].showteam == true && isValidTeamNum(team)) {
-				txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + playfield.questions[num].points + ']</span>';
-				// txt += playfield.teams[team].forecol
-				console.log(txt);
-			} else {
-				txt += " [" + playfield.questions[num].points + "]"
-				console.log(txt);
-			}
-			console.log('Score' + num);
-		} else {
-			console.log('No score' + num);
-		}
+	let q = playfield.questions[num];
+	let txt = ((q.used) ? q.answer : q.question)
+	if(q.isGraphic && txt.startsWith("http")) {
+		return "<img src=\"" + txt + "\" style=\"width:" + boxwidth + "px;max-height=" + boxheight + "px\">";
 	} else {
-		txt = txt + playfield.questions[num].question;
+		// console.log(txt)
+		if(txt.startsWith("\\")) {
+			txt = txt.substring(1);
+		}
+		if (q.used) {
+			if(q.showScore == true) {
+				let team = q.team;
+				console.log(team);
+				if(q.showteam == true && isValidTeamNum(team)) {
+					txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + q.points + ']</span>';
+					// txt += playfield.teams[team].forecol
+					console.log(txt);
+				} else {
+					txt += " [" + q.points + "]"
+					console.log(txt);
+				}
+				console.log('Score' + num);
+			} else {
+				console.log('No score' + num);
+			}
+		}
+		rtxt += txt + '</h1>';
+		return rtxt;
 	}
-	txt += '</h1>';
-		// }
-	// } else {
-		// txt += playfield.questions[num].text;
-	// }
-	return txt;
 }
 
 // Gets the boxes for the abve table
@@ -293,7 +297,7 @@ function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheigh
 			txt += playfield.questions[num].color;
 		}
 	}
-	txt += "\">" + genAnswerTableBoxText(num, text, hide, privileged) + "</td>";
+	txt += "\">" + genAnswerTableBoxText(num, boxwidth, boxheight) + "</td>";
 	return txt;
 }
 
@@ -670,7 +674,7 @@ function highlightBox(num, state, solo) {
 
 let randomizing = false;
 let randomizerid = undefined;
-let randomizerInterval = 500;
+
 function genRandomizerMenuInnards() {
 	let text = "";
 	let spacecount = 5
@@ -678,7 +682,7 @@ function genRandomizerMenuInnards() {
 	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
 	text += '  <div class="padded">';
 	text += '<div id="randomizerthingydiv"><center>';
-	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + randomizerInterval + '" min="0" step="100"/></td></tr></table>'
+	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + playfield.randomizerInterval + '" min="0" step="50"/></td></tr></table>'
 	// text += '<label for="randomizerinterval">Interval (ms):</label>'
 	text += '<button onclick=\"startRandomizing()\">Start</button>' + nbsp(2);
 	text += '<button onclick=\"stopRandomizing()\">Stop</button>';// + nbsp(2);
@@ -689,6 +693,10 @@ function genRandomizerMenuInnards() {
 }
 
 function openRandomizerMenu(teamnum) {
+	if(playfield.randomizerInterval == undefined) {
+		playfield.randomizerInterval = 250;
+	}
+
   let text = '';
 	// Make a floating window that the gamemaster can move around to their liking
   text += '<div id="randomizersettings" class="movable">';
@@ -709,14 +717,14 @@ function closeRandomizerMenu() {
 function startRandomizing() {
 	intervalTextBox = document.getElementById("randomizerinterval");
 	if(intervalTextBox != undefined) {
-		randomizerInterval = intervalTextBox.value;
+		playfield.randomizerInterval = intervalTextBox.value;
 	}
 	if(randomizerid != undefined) {
 		stopRandomizing();
 	}
 	lastRandCell = -1;
 	doRandomizing();
-	randomizerid = window.setInterval(doRandomizing, randomizerInterval);
+	randomizerid = window.setInterval(doRandomizing, playfield.randomizerInterval);
 }
 
 function stopRandomizing() {
@@ -729,7 +737,7 @@ function stopRandomizing() {
 let lastRandCell = -1;
 function doRandomizing() {
 	let nnum = lastRandCell;
-	while(!isValidTeamNum(nnum) || nnum == lastRandCell || !playfield.questions[nnum].randomizable) {
+	while(!isValidQuestionNum(nnum) || nnum == lastRandCell || !playfield.questions[nnum].randomizable) {
 		nnum = Math.floor(Math.random() * (playfield.width * playfield.height));
 	}
 	highlightBox(nnum, true, true);

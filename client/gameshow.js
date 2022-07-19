@@ -141,7 +141,10 @@ function startnew() {
 		obj.showScore = false;
 		obj.unusedcolor = "0000FF";
 		obj.usedcolor = "0080FF";
+		obj.highlightcolor = "808080";
+		obj.randomizable = true;
 		obj.question = "";
+		obj.isGraphic = false;
 		playfield.questions[i] = obj;
 	}
 	prepare("blank");
@@ -223,6 +226,10 @@ function prepare(json) {
 	myMode = MyModes.GAME;
 	meWaiting = true;
 	meReady();
+}
+
+function isValidQuestionNum(num) {
+	return num >= 0 && num < (playfield.width * playfield.height);
 }
 
 // Needs gameshowStorage.js
