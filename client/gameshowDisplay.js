@@ -75,7 +75,14 @@ function build() {
 		if(playfield.squarebox) {
 			squareboxstr = "checked=\"" + "true" + "\"";
 		}
-		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\">Config Color</input><table class=\"gametable\">";
+		let configcolorstr = "";
+		let cccb = document.getElementById("configcolor");
+		if(cccb != undefined) {
+			if(cccb.checked) {
+				configcolorstr = "checked";
+			}
+		}
+		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\" " + configcolorstr + ">Config Color</input><table class=\"gametable\">";
 		for (let i = 0; i < playfield.height; i++) {
 			tbl = tbl + "<tr>";
 			for (let j = 0; j < playfield.width; j++) {
@@ -134,6 +141,10 @@ function getNewControlTableBox_param(num, used) {
 	if (playfield.questions[num].showteam) {
 		showteamvalue = "checked";
 	}
+	let doHighlight = "";
+	if(playfield.questions[num].highlighted) {
+		doHighlight = "checked";
+	}
 	let txt = "<td id=\"box" + num + "\" class=\""
 	txt = txt + "gametd"
 	if (used) {
@@ -141,10 +152,14 @@ function getNewControlTableBox_param(num, used) {
 	}
 	// txt = txt + "\" width=\"64\" style=\"background-color:";
 	txt = txt + "\" style=\"background-color:#";
-	if (used) {
-		txt = txt + playfield.questions[num].usedcolor;
+	if(playfield.questions[num].highlighted) {
+		txt += playfield.questions[num].highlightcolor;
 	} else {
-		txt = txt + playfield.questions[num].unusedcolor;
+		if (used) {
+			txt = txt + playfield.questions[num].usedcolor;
+		} else {
+			txt = txt + playfield.questions[num].unusedcolor;
+		}
 	}
 	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" "
 	if(playfield.biganswer && playfield.currentBig >= 0 && playfield.currentBig !== num) {
@@ -165,8 +180,22 @@ function getNewControlTableBox_param(num, used) {
 			txt += "showans(" + num + ")\"><h3>Answer</h3>";
 		}
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
-	txt = txt + "<div id=\"box" + num + "color\" style=\"display:none\">Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/></td></div>"
+	txt = txt + "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/>"
+	txt += "<input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input>"
+	txt += "<input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input>"
+	txt += "<input id=\"doth" + num + "\" type=\"checkbox\" " + doHighlight + " onclick=\"updateHighlight(" + num + ")\">Highlight</input><br/>";
+	let hidestr = "style=\"display:none\"";
+	let cccb = document.getElementById("configcolor");
+	if(cccb != undefined) {
+		if(cccb.checked) {
+			hidestr = "";
+		}
+	}
+	txt = txt + "<div id=\"box" + num + "color\" " + hidestr + ">"
+	txt += "Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>";
+	txt += "Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/><br/>"
+	txt += "Highlight color<input id=\"colh" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].highlightcolor + "\"/><br/>";
+	txt += "</td></div>"
 
 	return txt;
 }
@@ -248,14 +277,18 @@ function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheigh
 		txt += " used";
 	}
 	txt = txt + "\" width=" + boxwidth + " height=" + boxheight + " style=\"background-color:#";
-	if(privileged) {
-		if (isqused) {
-			txt += playfield.questions[num].usedcolor;
-		} else {
-			txt += playfield.questions[num].unusedcolor;
-		}
+	if(playfield.questions[num].highlighted) {
+		txt += playfield.questions[num].highlightcolor;
 	} else {
-		txt += playfield.questions[num].color;
+		if(privileged) {
+			if (isqused) {
+				txt += playfield.questions[num].usedcolor;
+			} else {
+				txt += playfield.questions[num].unusedcolor;
+			}
+		} else {
+			txt += playfield.questions[num].color;
+		}
 	}
 	txt += "\">" + genAnswerTableBoxText(num, text, hide, privileged) + "</td>";
 	return txt;
@@ -589,4 +622,36 @@ function dragElement(elmnt) {
 		document.onmouseup = null;
 		document.onmousemove = null;
 	}
+}
+
+/*
+ * ██   ██ ██  ██████  ██   ██ ██      ██  ██████  ██   ██ ████████
+ * ██   ██ ██ ██       ██   ██ ██      ██ ██       ██   ██    ██
+ * ███████ ██ ██   ███ ███████ ██      ██ ██   ███ ███████    ██
+ * ██   ██ ██ ██    ██ ██   ██ ██      ██ ██    ██ ██   ██    ██
+ * ██   ██ ██  ██████  ██   ██ ███████ ██  ██████  ██   ██    ██
+ * Highlighting cells
+ */
+
+function updateHighlight(num) {
+	highlightBox(num, document.getElementById("doth" + num).checked);
+}
+
+// Highlights a box. State is the new state of the box. Solo is to unhighlight everything else.
+// Assumes state=true and solo=false if not specified
+function highlightBox(num, state, solo) {
+	if(state === undefined) {
+		state = true;
+	}
+	if(solo === undefined) {
+		solo = false;
+	}
+	if(solo) {
+		for(let i = 0; i < playfield.width * playfield.height; i++) {
+			playfield.questions[i].highlighted = (i == num) ? state : false;
+		}
+	} else {
+		playfield.questions[num].highlighted = state;
+	}
+	build();
 }
