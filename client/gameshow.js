@@ -73,6 +73,8 @@ playfield.title = "GameShow";
 playfield.biganswer = false;
 playfield.squarebox = false;
 playfield.teams = []
+playfield.currentbig = -1;
+playfield.showScore = 1;
 
 // The second screen presentation window
 let gamePanel;
@@ -136,7 +138,7 @@ function startnew() {
 		let obj = new Object();
 		obj.answer = "";
 		obj.points = 0;
-		obj.showscore = false;
+		obj.showScore = false;
 		obj.unusedcolor = "0000FF";
 		obj.usedcolor = "0080FF";
 		obj.question = "";

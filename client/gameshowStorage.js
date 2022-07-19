@@ -84,6 +84,10 @@ function loadjson(json) {
 								let save = JSON.parse(str);
 								if(save.width !== undefined && save.height !== undefined && save.biganswer !== undefined && save.squarebox !== undefined && save.title !== undefined && save.questions !== undefined) {
 									playfield = save;
+									// Defaults to things added since the OG Qv4
+									if(playfield.showScore === undefined) {
+										playfield.showScore = true;
+									}
 								} else {
 									console.log('JSON loading error');
 									alert("Error reading playfield data.")
@@ -122,7 +126,7 @@ function makejobject(i, o) {
 	obj.unusedcolor = document.getElementById('cols' + i).value;
 	obj.usedcolor = document.getElementById('cold' + i).value;
 	obj.question = document.getElementById('ques' + i).value;
-	obj.showscore = document.getElementById('dosc' + i).checked;
+	obj.showScore = document.getElementById('dosc' + i).checked;
 	obj.showteam = document.getElementById('dotm' + i).checked;
 	return obj;
 }
