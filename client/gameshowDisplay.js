@@ -75,14 +75,14 @@ function build() {
 		if(playfield.squarebox) {
 			squareboxstr = "checked=\"" + "true" + "\"";
 		}
-		let configcolorstr = "";
-		let cccb = document.getElementById("configcolor");
+		let showconfigstr = "";
+		let cccb = document.getElementById("showconfig");
 		if(cccb != undefined) {
 			if(cccb.checked) {
-				configcolorstr = "checked";
+				showconfigstr = "checked";
 			}
 		}
-		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\" " + configcolorstr + ">Config Color</input><table class=\"gametable\">";
+		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"showconfig\" type=\"checkbox\" onclick=\"setShowConfig()\" " + showconfigstr + ">Show Config</input><table class=\"gametable\">";
 		for (let i = 0; i < playfield.height; i++) {
 			tbl = tbl + "<tr>";
 			for (let j = 0; j < playfield.width; j++) {
@@ -120,8 +120,8 @@ function build() {
 }
 
 // Shows or hides the color modification boxes for cleaner view if you are not changing colors
-function setShowColorConfig() {
-	showColorConfig = document.getElementById('configcolor').checked;
+function setShowConfig() {
+	showColorConfig = document.getElementById('showconfig').checked;
 	for (let i = 0; i < playfield.height; i++) {
 		for (let j = 0; j < playfield.width; j++) {
 			let num = (i + (j * playfield.height))
@@ -130,21 +130,19 @@ function setShowColorConfig() {
 	}
 }
 
+function makeConfigCheckbox(id, num, checked, text, func, table) {
+	if(func == undefined) {
+		func = "looks";
+	}
+	if(table == undefined) {
+		table = true;
+	}
+	return ((table) ? "<td>" : "") + "<input id=\"" + id + num + "\" type=\"checkbox\" " + ((checked) ? "checked" : "") + " onclick=\"" + func + "(" + num + ")\">" + text + "</input>" + ((table) ? "</td>" : "");
+}
+
 // Creates a table element to add to the control table for a specific cell.
 // <button onclick=\"myclickkeep(" + num + ")\"><h3>" + (num + 1) + "(" + questions[num].points + "): " + questions[num].answer + "</h3></button>
 function getNewControlTableBox_param(num, used) {
-	let showscorevalue = "";
-	if (playfield.questions[num].showScore) {
-		showscorevalue = "checked";
-	}
-	let showteamvalue = "";
-	if (playfield.questions[num].showteam) {
-		showteamvalue = "checked";
-	}
-	let doHighlight = "";
-	if(playfield.questions[num].highlighted) {
-		doHighlight = "checked";
-	}
 	let txt = "<td id=\"box" + num + "\" class=\""
 	txt = txt + "gametd"
 	if (used) {
@@ -180,18 +178,23 @@ function getNewControlTableBox_param(num, used) {
 			txt += "showans(" + num + ")\"><h3>Answer</h3>";
 		}
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/>"
-	txt += "<input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input>"
-	txt += "<input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input>"
-	txt += "<input id=\"doth" + num + "\" type=\"checkbox\" " + doHighlight + " onclick=\"updateHighlight(" + num + ")\">Highlight</input><br/>";
+	txt += "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/>"
+	txt += makeConfigCheckbox("doth", num, playfield.questions[num].highlighted, "Highlight", "updateHighlight", false);
+
 	let hidestr = "style=\"display:none\"";
-	let cccb = document.getElementById("configcolor");
+	let cccb = document.getElementById("showconfig");
 	if(cccb != undefined) {
 		if(cccb.checked) {
 			hidestr = "";
 		}
 	}
-	txt = txt + "<div id=\"box" + num + "color\" " + hidestr + ">"
+	txt += "<div id=\"box" + num + "color\" " + hidestr + ">";
+	txt += "<center><table><tr>";
+	txt += makeConfigCheckbox("dotm", num, playfield.questions[num].showteam, "Show Team");
+	txt += makeConfigCheckbox("dosc", num, playfield.questions[num].showScore, "Show Score");
+	txt += "</tr><tr>";
+	txt += makeConfigCheckbox("dotr", num, playfield.questions[num].randomizable, "Randomizable");
+	txt += "</tr></table></center>";
 	txt += "Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>";
 	txt += "Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/><br/>"
 	txt += "Highlight color<input id=\"colh" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].highlightcolor + "\"/><br/>";
@@ -726,8 +729,8 @@ function stopRandomizing() {
 let lastRandCell = -1;
 function doRandomizing() {
 	let nnum = lastRandCell;
-	while(nnum == lastRandCell) {
-		nnum = Math.floor(Math.random() * (playfield.width * playfield.height))
+	while(!isValidTeamNum(nnum) || nnum == lastRandCell || !playfield.questions[nnum].randomizable) {
+		nnum = Math.floor(Math.random() * (playfield.width * playfield.height));
 	}
 	highlightBox(nnum, true, true);
 	lastRandCell = nnum;

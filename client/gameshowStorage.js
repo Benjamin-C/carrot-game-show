@@ -96,6 +96,9 @@ function loadjson(json) {
 										if(q.highlighted === undefined) {
 											q.highlighted = false;
 										}
+										if(q.randomizable === undefined) {
+											q.randomizable = true;
+										}
 									}
 								} else {
 									console.log('JSON loading error');
@@ -139,6 +142,7 @@ function makejobject(i, o) {
 	obj.showScore = document.getElementById('dosc' + i).checked;
 	obj.showteam = document.getElementById('dotm' + i).checked;
 	obj.highlighted = document.getElementById('doth' + i).checked;
+	obj.randomizable = document.getElementById('dotr' + i).checked;
 	return obj;
 }
 
