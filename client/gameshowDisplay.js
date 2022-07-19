@@ -92,7 +92,7 @@ function build() {
 		}
 		tbl = tbl + "</table>";
 		document.getElementById("table").innerHTML = tbl;
-		let ctlhtml = "<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
+		let ctlhtml = "<button onclick=\"openRandomizerMenu()\"><h1>Rand</h1></button>&nbsp<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
 		ctlhtml = ctlhtml + "<button onclick=\"showXr()\"><h1 style=\"color:#FF0080\">R</h1></button><button id=\"xtb0\" onclick=\"showX(0)\"><h1 style=\"color:#FF0000\">&nbsp&nbsp</h1></button><button id=\"xtb1\" onclick=\"showX(1)\" style=\"background-color:#808080\"><h1 style=\"color:#FF0000\">X</h1></button><button id=\"xtb2\" onclick=\"showX(2)\"><h1 style=\"color:#FF0000\">XX</h1></button><button id=\"xtb3\" onclick=\"showX(3)\"><h1 style=\"color:#FF0000\">XXX</h1></button>";
 		document.getElementById("control").innerHTML = ctlhtml;
 
@@ -591,6 +591,7 @@ function dragElement(elmnt) {
 	} else {
 		// otherwise, move the DIV from anywhere inside the DIV:
 		elmnt.onmousedown = dragMouseDown;
+		console.log("No header found, using anywhere insted");
 	}
 
 	function dragMouseDown(e) {
@@ -654,4 +655,81 @@ function highlightBox(num, state, solo) {
 		playfield.questions[num].highlighted = state;
 	}
 	build();
+}
+/*
+ * ██████   █████  ███    ██ ██████   ██████  ███    ███ ██ ███████ ███████ ██████
+ * ██   ██ ██   ██ ████   ██ ██   ██ ██    ██ ████  ████ ██    ███  ██      ██   ██
+ * ██████  ███████ ██ ██  ██ ██   ██ ██    ██ ██ ████ ██ ██   ███   █████   ██████
+ * ██   ██ ██   ██ ██  ██ ██ ██   ██ ██    ██ ██  ██  ██ ██  ███    ██      ██   ██
+ * ██   ██ ██   ██ ██   ████ ██████   ██████  ██      ██ ██ ███████ ███████ ██   ██
+ * Randomly highlight cells every now and then
+ */
+
+let randomizing = false;
+let randomizerid = undefined;
+let randomizerInterval = 500;
+function genRandomizerMenuInnards() {
+	let text = "";
+	let spacecount = 5
+	text += '<div id="randomizersettingsheader" class="movable-header" style="background-color:404040; color:B0B0B0">' + nbsp(spacecount) + 'Randomizer Config' + nbsp(spacecount) + '<button onclick="closeRandomizerMenu()" class="xitbtn">X</button></div>';
+	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
+	text += '  <div class="padded">';
+	text += '<div id="randomizerthingydiv"><center>';
+	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + randomizerInterval + '" min="0" step="100"/></td></tr></table>'
+	// text += '<label for="randomizerinterval">Interval (ms):</label>'
+	text += '<button onclick=\"startRandomizing()\">Start</button>' + nbsp(2);
+	text += '<button onclick=\"stopRandomizing()\">Stop</button>';// + nbsp(2);
+	text += '</center></div>'
+	text += '</div>';
+
+	return text;
+}
+
+function openRandomizerMenu(teamnum) {
+  let text = '';
+	// Make a floating window that the gamemaster can move around to their liking
+  text += '<div id="randomizersettings" class="movable">';
+	// Title bar
+	text += genRandomizerMenuInnards();
+	// popup div
+	text += '</div>';
+  console.log("Opening randomizer settings");
+  document.getElementById("floatingbox-randomizer").innerHTML = text;
+  dragElement(document.getElementById("randomizersettings"));
+}
+
+// Close the team settings dialog
+function closeRandomizerMenu() {
+	document.getElementById("floatingbox-randomizer").innerHTML = '';
+}
+
+function startRandomizing() {
+	intervalTextBox = document.getElementById("randomizerinterval");
+	if(intervalTextBox != undefined) {
+		randomizerInterval = intervalTextBox.value;
+	}
+	if(randomizerid != undefined) {
+		stopRandomizing();
+	}
+	lastRandCell = -1;
+	doRandomizing();
+	randomizerid = window.setInterval(doRandomizing, randomizerInterval);
+}
+
+function stopRandomizing() {
+	if(randomizerid != undefined) {
+		window.clearInterval(randomizerid);
+		randomizerid = undefined;
+	}
+}
+
+let lastRandCell = -1;
+function doRandomizing() {
+	let nnum = lastRandCell;
+	while(nnum == lastRandCell) {
+		nnum = Math.floor(Math.random() * (playfield.width * playfield.height))
+	}
+	highlightBox(nnum, true, true);
+	lastRandCell = nnum;
+	console.log("Randomizing!" + nnum);
 }
