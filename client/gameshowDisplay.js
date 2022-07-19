@@ -69,7 +69,7 @@ function build() {
 		}
 		let biganswerstr = "";
 		if (playfield.biganswer) {
-			biganswerstr = "checked=\"" + "false" + "\"";
+			biganswerstr = "checked=\"" + "true" + "\"";
 		}
 		let squareboxstr = "";
 		if(playfield.squarebox) {
@@ -90,11 +90,22 @@ function build() {
 		document.getElementById("control").innerHTML = ctlhtml;
 
 		// For other window
-
-		gamePanel.document.getElementById("table").innerHTML = getAnswerTable();
 		gamePanel.document.title = "BenGameShow";
 		//document.getElementById('control').innerHTML = "</div><center><table><tr><td><h1 id=\"score\"></h1></td><td><button onclick=\"savejson()\"><h1>Save</h1></button></td></tr></table></center>";
-		showScore();
+		if(playfield.currentBig !== undefined && playfield.currentBig >= 0) {
+			let box = getNewAnswerTableBox_param(playfield.currentBig, true, false);
+			gamePanel.document.getElementById("table").innerHTML = "<table><tr>" + box + "</tr></table>";
+			gamePanel.document.getElementById("box" + playfield.currentBig).className = "gametd center";
+			gamePanel.document.getElementById("text" + playfield.currentBig).className = "center";
+			gamePanel.document.getElementById("box" + playfield.currentBig).style.width = (window.innerWidth) + "px";
+			gamePanel.document.getElementById("box" + playfield.currentBig).style.height = (window.innerHeight) + "px";
+			hideScore();
+		} else {
+			// Not big answer
+			gamePanel.document.getElementById("table").innerHTML = getAnswerTable();
+			drawScore();
+		}
+		// TODO put it here
 		cacheGame(); // Save the game to the cache in case something crashes
 	}
 	break;
@@ -116,7 +127,7 @@ function setShowColorConfig() {
 // <button onclick=\"myclickkeep(" + num + ")\"><h3>" + (num + 1) + "(" + questions[num].points + "): " + questions[num].answer + "</h3></button>
 function getNewControlTableBox_param(num, used) {
 	let showscorevalue = "";
-	if (playfield.questions[num].showscore) {
+	if (playfield.questions[num].showScore) {
 		showscorevalue = "checked";
 	}
 	let showteamvalue = "";
@@ -135,13 +146,26 @@ function getNewControlTableBox_param(num, used) {
 	} else {
 		txt = txt + playfield.questions[num].unusedcolor;
 	}
-	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" onclick=\"";
+	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" "
+	if(playfield.biganswer && playfield.currentBig >= 0 && playfield.currentBig !== num) {
+		txt += "class=\"disabledbutton\" disabled ";
+	}
+	txt += "onclick=\"";
 	if (used) {
 		txt = txt + "hideans(" + num + ")\">" + makeHideButton(num);
-	} else {
-		txt = txt + "showans(" + num + ")\"><h3>Answer</h3>";
+	} else { // "doneans(" + num + ")
+		// txt += "showans(" + num + ")\"><h3>"
+		if(playfield.biganswer) {
+			if(playfield.currentBig !== num) {
+				txt += "showans(" + num + ")\"><h3>Show</h3>";
+			} else {
+				txt += "doneans(" + num + ")\"><h3>Done</h3>";
+			}
+		} else {
+			txt += "showans(" + num + ")\"><h3>Answer</h3>";
+		}
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"update(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
+	txt = txt + "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
 	txt = txt + "<div id=\"box" + num + "color\" style=\"display:none\">Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/></td></div>"
 
 	return txt;
@@ -183,12 +207,12 @@ function getAnswerTable(privileged, doc, vsf) {
 
 // Gets the text to show in the box. num is the question num. Not sure what the commented stuff is meant to do
 function genAnswerTableBoxText(num) {//, showans, hide, privileged) {
-	let txt = '<h1>';
+	let txt = '<h1 id=text' + num + '>';
 	// if(privileged) {
 		// if (!hide) {
 	if (playfield.questions[num].used) {
 		txt = txt + playfield.questions[num].answer;
-		if(playfield.questions[num].showscore == true) {
+		if(playfield.questions[num].showScore == true) {
 			let team = playfield.questions[num].team;
 			console.log(team);
 			if(playfield.questions[num].showteam == true && isValidTeamNum(team)) {
@@ -245,12 +269,18 @@ function getNewAnswerTableBox(num, boxwidth, boxheight, privileged) {
 // Hides the score display
 // Used for blank/image/video/big answers
 function hideScore() {
-	document.getElementById("score").innerHTML = "";
+	// document.getElementById("score").innerHTML = "";
+	playfield.showScore = false;
 	gamePanel.document.getElementById("score").innerHTML = "";
 }
 
 // Shows the score display
 function showScore() {
+	playfield.showScore = true;
+	drawScore();
+}
+
+function drawScore() {
 	var cfg = "";
 	var scb = "<table><tr>";
 	// Calculate the correct team scores
@@ -269,7 +299,9 @@ function showScore() {
 	cfg += nbsp(1) + '<button id="scoreadd" onclick="addNewTeam()" style="color:#FFFFFF; background-color:#222222"><h2>+</h2></button>';
 	scb += "</tr></table>";
 	document.getElementById("score").innerHTML = cfg;
-	gamePanel.document.getElementById("score").innerHTML = scb;
+	if(playfield.showScore) {
+		gamePanel.document.getElementById("score").innerHTML = scb;
+	}
 	updateTeamMenuInnards();
 }
 
@@ -317,7 +349,7 @@ function setScoreID(id) {
 	//   document.getElementById("scoreid-" + iter).style.background = scorecolor[(iter == id) ? 1 : 2][iter];
 	// }
 	// scorecolor
-	showScore();
+	drawScore();
 }
 
 // Opens the main window, setting up the second (player) display
@@ -390,85 +422,32 @@ function makeHideButton(num) {
 
 // Shows an answer to a question
 function showans(num) {
-	playfield.questions[num].team = scoreid;
-	if (playfield.biganswer) { // This does not seem to work
-		// myMode = MyModes.ANS;
-		document.getElementById("ansbtn" + num).onclick = function() {
-			doneans(num); // Call doneans to clean up large answers
-		};
-		document.getElementById("ansbtn" + num).innerHTML = "Done";
-
-		console.log(document.getElementById("ansbtn" + num).className);
-
-		for (let i = 0; i < (playfield.width * playfield.height); i++) {
-			if (i != num) {
-				document.getElementById("ansbtn" + i).disabled = true;
-				document.getElementById("ansbtn" + i).className = "disabledbutton";
-			}
-		}
-		let box = getNewAnswerTableBox_param(num, true, false);
-		console.log(box);
-		gamePanel.document.getElementById("table").innerHTML = "<table><tr>" + box + "</tr></table>";
-		gamePanel.document.getElementById("box" + num).className = "gametd center";
-		gamePanel.document.getElementById("text" + num).className = "center";
-		gamePanel.document.getElementById("box" + num).style.width = (window.innerWidth) + "px";
-		gamePanel.document.getElementById("box" + num).style.height = (window.innerHeight) + "px";
-		hideScore();
+	update(num);
+	if (playfield.biganswer) {
+		playfield.currentBig = num;
 	} else {
-		document.getElementById("ansbtn" + num).onclick = function() {
-			hideans(num)
-		};
-
-		document.getElementById("ansbtn" + num).innerHTML = makeHideButton(num);
-
 		playfield.questions[num].used = true;
-		let pts = parseInt(document.getElementById("pts" + num).value);
-		// score[scoreid] = score[scoreid] + pts;
-
-		update(num);
-		// document.getElementById("box" + num).className = "used";
-		// gamePanel.document.getElementById("box" + num).className = "used";
-		showScore();
 	}
+	build();
 }
 
 // Function to call when you are done viewing a large answer
 function doneans(num) {
-	document.getElementById("ansbtn" + num).onclick = function() {
-		hideans(num)
-	};
-	document.getElementById("ansbtn" + num).innerHTML = "<h3>Hide</h3>";
-
+	playfield.questions[num].team = scoreid;
 	playfield.questions[num].used = true;
+	playfield.currentBig = -1;
+	console.log("Unbigged");
 	update(num);
-
-	for (let i = 0; i < (playfield.width * playfield.height); i++) {
-		if (i != num) {
-			document.getElementById("ansbtn" + i).disabled = false;
-			document.getElementById("ansbtn" + i).className = "";
-		}
-	}
-
-	let pts = parseInt(document.getElementById("pts" + num).value);
-	score[scoreid] = score[scoreid] + pts;
 	showScore();
-
-	gamePanel.document.getElementById("table").innerHTML = getAnswerTable();
+	build();
 }
 
 // Function to call to hide an already visible answer
 function hideans(num) {
-	document.getElementById("ansbtn" + num).onclick = function() {
-		showans(num)
-	};
-	document.getElementById("ansbtn" + num).innerHTML = "<h3>Answer</h3>";
 	playfield.questions[num].used = false;
 	playfield.questions[num].team = -1;
-	let pts = parseInt(document.getElementById("pts" + num).value);
-	score[scoreid] = score[scoreid] - pts;
-	showScore();
-	document.getElementById("box" + num)
 	update(num);
+	build();
 }
 
 /*
@@ -478,6 +457,12 @@ function hideans(num) {
  * ██    ██  ██       ██   ██  ██   ██     ██     ██
  *  ██████   ██       ██████   ██   ██     ██     ███████
  */
+
+// Update a cell then build the board
+function looks(num) {
+	update(num);
+	build(num);
+}
 
 // Seems to be called every time any aspect of a box changes
 // Updates colors and some text

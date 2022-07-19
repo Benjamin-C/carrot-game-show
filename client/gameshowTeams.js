@@ -33,7 +33,7 @@ let gear = '\u2699';
 
 function addNewTeam() {
 	playfield.teams.push(genTeam("", "FFFFFF", "#888888", "#444444"));
-	showScore();
+	drawScore();
 }
 
 // Modifies a team score. Dir sets wether to add, set, or subtract the value in a textbox
@@ -50,7 +50,7 @@ function scorechange(teamnum, dir) {
 	} else if (dir == -1) {
 		team.scoreAdj += change;
 	}
-	showScore();
+	drawScore();
 }
 
 let openTeamMenuNum = -1;
@@ -170,7 +170,7 @@ function updateColors() {
 			playfield.teams[i].backcol = '#' + document.getElementById('teambackcol' + i).value;
 		}
 	}
-	showScore();
+	drawScore();
 }
 
 function removeTeam(id, confirmedRemove) {
