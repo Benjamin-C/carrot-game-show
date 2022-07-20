@@ -291,7 +291,7 @@ function controlGameFade(opas, time, onDone) {
 // Load game from cookies
 // Probably shows it now?
 function handleCacheSelect() {
-	let t = readCookie(backup_name);
+	let t = readCachedGame();
 	prepare(t);
 }
 

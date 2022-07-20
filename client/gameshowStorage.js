@@ -185,7 +185,19 @@ function savejson(silent) {
 
 // Saves a copy of the game to a cookie
 function cacheGame() {
-	setCookie(backup_name, savejson(true), 1);
+	if(mayUseLocalStorage) {
+		window.localStorage.setItem(backup_name, savejson(true));
+	} else {
+		setCookie(backup_name, savejson(true), 1); // Fall back to cookies if needed
+	}
+}
+
+function readCachedGame() {
+	if(mayUseLocalStorage) {
+		return window.localStorage.getItem(backup_name);
+	} else {
+		return readCookie(backup_name); // Fall back to cookies if needed
+	}
 }
 
 function download(filename, text) {
@@ -199,6 +211,16 @@ function download(filename, text) {
   element.click();
 
   document.body.removeChild(element);
+}
+
+// Copies stuff to the user's clipboard
+function savetoClipboard(text) {
+	document.getElementById('cb').hidden = false;
+	document.getElementById('cb').value = text;
+	var copyText = document.querySelector("#cb");
+	copyText.select();
+	document.execCommand("copy");
+	document.getElementById('cb').hidden = true;
 }
 
 /*
@@ -233,12 +255,39 @@ function readCookie(cname) {
 	return "";
 }
 
-// Copies stuff to the user's clipboard
-function savetoClipboard(text) {
-	document.getElementById('cb').hidden = false;
-	document.getElementById('cb').value = text;
-	var copyText = document.querySelector("#cb");
-	copyText.select();
-	document.execCommand("copy");
-	document.getElementById('cb').hidden = true;
+
+/*
+ * ██     ██ ███████ ██████      ███████ ████████  ██████  ██████   █████   ██████  ███████
+ * ██     ██ ██      ██   ██     ██         ██    ██    ██ ██   ██ ██   ██ ██       ██
+ * ██  █  ██ █████   ██████      ███████    ██    ██    ██ ██████  ███████ ██   ███ █████
+ * ██ ███ ██ ██      ██   ██          ██    ██    ██    ██ ██   ██ ██   ██ ██    ██ ██
+ *  ███ ███  ███████ ██████      ███████    ██     ██████  ██   ██ ██   ██  ██████  ███████
+ * Web Storage API stuff to replace cookies
+ */
+
+let mayUseLocalStorage = storageAvailable('localStorage');
+
+function storageAvailable(type) {
+   let storage;
+   try {
+       storage = window[type];
+       const x = '__storage_test__';
+       storage.setItem(x, x);
+       storage.removeItem(x);
+       return true;
+   }
+   catch(e) {
+       return e instanceof DOMException && (
+           // everything except Firefox
+           e.code === 22 ||
+           // Firefox
+           e.code === 1014 ||
+           // test name field too, because code might not be present
+           // everything except Firefox
+           e.name === 'QuotaExceededError' ||
+           // Firefox
+           e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+           // acknowledge QuotaExceededError only if there's something already stored
+           (storage && storage.length !== 0);
+   }
 }
