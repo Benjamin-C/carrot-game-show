@@ -15,10 +15,9 @@ function openNetworkSettings() {
 	text += '  <div class="padded"><table id="netsettingsbody" class="settingsbodytable">';
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.setOnline(' + ((netman.online) ? 'false' : 'true') + ')">' + ((netman.online) ? 'End' : 'Start new') + ' online game</button></td></tr>';
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.copyGID()">Copy GID</button></td></tr>';
-	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="savetoClipboard(\'' + baseURL + '&role=master&action=message&message=button0&gid=\' + netman.gid )">Copy Button URL</button></td></tr>';
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.sendClearGamesRequest()">Clear all games</button></td></tr>';
-
-	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.sendButtonPressRequest(undefined)">Button test</button></td></tr>';
+	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="savetoClipboard(\'' + baseURL + '&role=master&action=message&message=button\' + document.getElementById(\'buttonnum\').value + \'&gid=\' + netman.gid )">Copy Button URL</button></td></tr>';
+	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.sendButtonPressRequest()">Button test</button><label for="buttonnum">ID:</label><input id="buttonnum" style="width:4em" type="number" value="0" min="0" step="1"/></td></tr>';
 	text += '</table></div></div>';
 	console.log("Opening net settings");
 	document.getElementById("floatingbox-network").innerHTML = text;
@@ -77,6 +76,7 @@ class NetworkManager {
 									// }
 									that.online = true;
 									that.sendReciverRequest();
+									document.getElementById("onlinestatus").innerHTML = "<span style=\"color:green\">ONLINE!</span>";
 								} else {
 									console.log("GID or KEY was not specified");
 								}
@@ -189,7 +189,8 @@ class NetworkManager {
 					console.log(this.status + ": " + this.responseText);
 				}
 			};
-			xhttp.open("POST", baseURL + "&role=master&action=message&message=button0&lastCID=0&gid=" + this.gid, true);
+			let num = document.getElementById('buttonnum').value;
+			xhttp.open("POST", baseURL + "&role=master&action=message&message=button" + num + "&lastCID=0&gid=" + this.gid, true);
 			let pl = payload;
 			if(typeof payload !== 'string') {
 				pl = JSON.stringify(payload);

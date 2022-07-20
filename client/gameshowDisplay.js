@@ -92,7 +92,7 @@ function build() {
 		}
 		tbl = tbl + "</table>";
 		document.getElementById("table").innerHTML = tbl;
-		let ctlhtml = "<button onclick=\"openRandomizerMenu()\"><h1>Rand</h1></button>&nbsp<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
+		let ctlhtml = "<button onclick=\"openBuzzerMenu()\"><h1>Buzz</h1></button>&nbsp<button onclick=\"openRandomizerMenu()\"><h1>Rand</h1></button>&nbsp<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
 		ctlhtml = ctlhtml + "<button onclick=\"showXr()\"><h1 style=\"color:#FF0080\">R</h1></button><button id=\"xtb0\" onclick=\"showX(0)\"><h1 style=\"color:#FF0000\">&nbsp&nbsp</h1></button><button id=\"xtb1\" onclick=\"showX(1)\" style=\"background-color:#808080\"><h1 style=\"color:#FF0000\">X</h1></button><button id=\"xtb2\" onclick=\"showX(2)\"><h1 style=\"color:#FF0000\">XX</h1></button><button id=\"xtb3\" onclick=\"showX(3)\"><h1 style=\"color:#FF0000\">XXX</h1></button>";
 		document.getElementById("control").innerHTML = ctlhtml;
 
@@ -676,23 +676,6 @@ let randomizing = false;
 let randomizerid = undefined;
 const RANDOMIZER_CALLBACK_NAME = "randomizercallback";
 
-function genRandomizerMenuInnards() {
-	let text = "";
-	let spacecount = 5
-	text += '<div id="randomizersettingsheader" class="movable-header" style="background-color:404040; color:B0B0B0">' + nbsp(spacecount) + 'Randomizer Config' + nbsp(spacecount) + '<button onclick="closeRandomizerMenu()" class="xitbtn">X</button></div>';
-	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
-	text += '  <div class="padded">';
-	text += '<div id="randomizerthingydiv"><center>';
-	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + playfield.randomizerInterval + '" min="0" step="50"/></td></tr></table>'
-	// text += '<label for="randomizerinterval">Interval (ms):</label>'
-	text += '<button onclick=\"startRandomizing()\">Start</button>' + nbsp(2);
-	text += '<button onclick=\"stopRandomizing()\">Stop</button>';// + nbsp(2);
-	text += '</center></div>'
-	text += '</div>';
-
-	return text;
-}
-
 function openRandomizerMenu(teamnum) {
 	if(playfield.randomizerInterval == undefined) {
 		playfield.randomizerInterval = 250;
@@ -702,7 +685,17 @@ function openRandomizerMenu(teamnum) {
 	// Make a floating window that the gamemaster can move around to their liking
   text += '<div id="randomizersettings" class="movable">';
 	// Title bar
-	text += genRandomizerMenuInnards();
+	let spacecount = 5
+	text += '<div id="randomizersettingsheader" class="movable-header" style="background-color:404040; color:B0B0B0">' + nbsp(spacecount) + 'Randomizer Config' + nbsp(spacecount) + '<button onclick="closeRandomizerMenu()" class="xitbtn">X</button></div>';
+	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
+	text += '  <div class="padded">';
+	text += '<div id="randomizerthingydiv"><center>';
+	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + playfield.randomizerInterval + '" min="0" step="50"/></td></tr></table>'
+	// text += '<label for="randomizerinterval">Interval (ms):</label>'
+	text += '<button class="larger" onclick=\"startRandomizing()\">Start</button>' + nbsp(2);
+	text += '<button class="larger" onclick=\"stopRandomizing()\">Stop</button>';// + nbsp(2);
+	text += '</center></div>'
+	text += '</div>';
 	// popup div
 	text += '</div>';
   console.log("Opening randomizer settings");
@@ -750,4 +743,116 @@ function doRandomizing() {
 	}
 	highlightBox(nnum, true, true);
 	lastRandCell = nnum;
+}
+
+/*
+ * ██████  ██    ██ ███████ ███████ ███████ ██████  ███████
+ * ██   ██ ██    ██    ███     ███  ██      ██   ██ ██
+ * ██████  ██    ██   ███     ███   █████   ██████  ███████
+ * ██   ██ ██    ██  ███     ███    ██      ██   ██      ██
+ * ██████   ██████  ███████ ███████ ███████ ██   ██ ███████
+ * Remote buzzers
+ */
+
+function buttonOrderText() {
+	let txt = '';
+	for(let i = 0; i < buzzerOrder.length; i++) {
+		let num = buzzerOrder[i];
+		txt += '<span style="color:' + playfield.teams[num].forecol + '">' + num + '</span> ';
+	}
+	return txt;
+}
+
+function openBuzzerMenu(teamnum) {
+  let text = '';
+	// Make a floating window that the gamemaster can move around to their liking
+  text += '<div id="buzzerssettings" class="movable">';
+	// Title bar
+	let spacecount = 5
+	text += '<div id="buzzerssettingsheader" class="movable-header" style="background-color:404040; color:B0B0B0">' + nbsp(spacecount) + 'Buzzer Control' + nbsp(spacecount) + '<button onclick="closeBuzzerMenu()" class="xitbtn">X</button></div>';
+	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
+	text += '  <div class="padded">';
+	text += '<div id="buzzersthingydiv"><center>';
+	// text += '<table><tr><td><label for="buzzersinterval">Interval (ms):</label></td><td><input id="buzzersinterval" style="width:4em" type="number" value="100" min="0" step="50"/></td></tr></table>'
+	// text += '<label for="buzzersinterval">Interval (ms):</label>'
+	text += '<button class="larger" id="buzzerenable" onclick=\"enableBuzzers()\">Enable</button>' + nbsp(2);
+	text += '<button class="larger" onclick=\"resetBuzzers()\">Reset</button>' + nbsp(2);
+	text += '<br/><span class="larger" id="buttonorder">' + buttonOrderText() + '</span>';
+	text += '<button class="larger" onclick=\"nextButton()\">-&gt</button>';// + nbsp(2);
+	text += '</center></div>'
+	text += '</div>';
+	// popup div
+	text += '</div>';
+  console.log("Opening buzzers settings");
+  document.getElementById("floatingbox-buzzers").innerHTML = text;
+  dragElement(document.getElementById("buzzerssettings"));
+}
+
+// Close the team settings dialog
+function closeBuzzerMenu() {
+	document.getElementById("floatingbox-buzzers").innerHTML = '';
+}
+
+let buzzersEnabled = false;
+const BUZZER_CALLBACK_NAME = "buzzercallback"
+let buzzerOrder = [];
+
+function enableBuzzers() {
+	console.log("Enable Buzzers");
+	buzzersEnabled = true;
+	netman.addCallback(BUZZER_CALLBACK_NAME, (item) => {
+		let msg = item.message.substring(item.message.indexOf(')') + 3);
+		if(msg.startsWith("button")) {
+			if(buzzersEnabled) {
+				let num = parseInt(msg.substring("button".length));
+				console.log('BUTTON! ' + num);
+				if(isValidTeamNum(num) && !buzzerOrder.includes(num)) {
+					if(buzzerOrder.length == 0) {
+						setScoreID(num);
+					}
+					buzzerOrder.push(num);
+					let botb = document.getElementById("buttonorder");
+					if(botb != undefined) {
+						buttonorder.innerHTML = buttonOrderText();
+					}
+				}
+			}
+		}
+	});
+	let bebtn = document.getElementById("buzzerenable")
+	if(bebtn != undefined) {
+		bebtn.innerHTML = "Disable";
+		bebtn.onclick = () => { disableBuzzers(); } ;
+	}
+}
+
+function disableBuzzers() {
+	console.log("Disable Buzzers");
+	buzzersEnabled = false;
+	netman.removeCallback(BUZZER_CALLBACK_NAME);
+	let bebtn = document.getElementById("buzzerenable")
+	if(bebtn != undefined) {
+		bebtn.innerHTML = "Enable";
+		bebtn.onclick = () => { enableBuzzers(); };
+	}
+}
+
+function resetBuzzers() {
+	buzzerOrder = [];
+	let botb = document.getElementById("buttonorder");
+	if(botb != undefined) {
+		buttonorder.innerHTML = '';
+	}
+	console.log("Reset Buzzers");
+}
+
+function nextButton() {
+	buzzerOrder.shift();
+	if(buzzerOrder.length > 0) {
+		setScoreID(buzzerOrder[0]);
+	}
+	let botb = document.getElementById("buttonorder");
+	if(botb != undefined) {
+		buttonorder.innerHTML = buttonOrderText();
+	}
 }

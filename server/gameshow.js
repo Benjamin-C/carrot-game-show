@@ -431,13 +431,14 @@ function process(args, body, res) {
                 r.cause = "message";
                 r.message = "The Master has spoken (" + now.toLocaleTimeString() + "): " + args.message;
                 game.sendUpdate(r);
-                res.end("Message id " + game.buff.lastCID + " sent");
+                // res.end("Message id " + game.buff.lastCID + " sent");
                 console.log("The message has been sent");
               } else {
                 res.end("That game does not exist");
                 console.log("Game does not exist");
               }
             });
+            res.end("Messages sent to everyone");
             // res.end("Invalid GID")
             // console.log("Invalid GID");
           }

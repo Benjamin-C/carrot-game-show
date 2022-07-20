@@ -9,7 +9,7 @@
     margin: auto;
     overflow: auto;
 }
-/* Not sure quite what this does, but it does more than just center some text */ 
+/* Not sure quite what this does, but it does more than just center some text */
 .center {
   margin: 0;
   position: absolute;
@@ -74,7 +74,7 @@ button {
 }
 
 .larger {
-  font-size: 120%;
+  font-size: 125%;
 }
 
 .floattitle {
