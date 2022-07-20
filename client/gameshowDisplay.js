@@ -256,7 +256,6 @@ function genAnswerTableBoxText(num, boxwidth, boxheight) {//, showans, hide, pri
 	// if(privileged) {
 		// if (!hide) {
 	let q = playfield.questions[num];
-	console.log(isValidQuestionNum(playfield.currentBig));
 	if(playfield.biganswer && num != playfield.currentBig && ((q.used && q.hideA) || (!q.used && q.hideQ))) {
 		return rtxt + nbsp(1) + "</h1>";
 	} else if(playfield.biganswer && num != playfield.currentBig && ((q.used && q.aIsPts) || (!q.used && q.qIsPts))) {
