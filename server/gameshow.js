@@ -424,8 +424,22 @@ function process(args, body, res) {
               console.log("Game does not exist");
             }
           } else {
-            res.end("Invalid GID")
-            console.log("Invalid GID");
+            currentGames.forEach((game, key, map) => {
+              if(game !== undefined) {
+                let now = new Date();
+                let r = new Object();
+                r.cause = "message";
+                r.message = "The Master has spoken (" + now.toLocaleTimeString() + "): " + args.message;
+                game.sendUpdate(r);
+                res.end("Message id " + game.buff.lastCID + " sent");
+                console.log("The message has been sent");
+              } else {
+                res.end("That game does not exist");
+                console.log("Game does not exist");
+              }
+            });
+            // res.end("Invalid GID")
+            // console.log("Invalid GID");
           }
         } else {
           res.end("No message specified");
@@ -503,6 +517,16 @@ function process(args, body, res) {
       } break;
       case "update": {
         console.log("Updating based on " + body);
+      } break;
+      case "clear": {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        if(args.confirm == "true") {
+          currentGames.clear();
+          res.end("Cleared");
+          console.log('Cleared all games');
+        } else {
+          res.end("Set confirm to true to clear all games");
+        }
       } break;
 //                             __
 //    | |\ | \  /  /\  |    | |  \

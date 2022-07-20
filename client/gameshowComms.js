@@ -16,6 +16,8 @@ function openNetworkSettings() {
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.setOnline(' + ((netman.online) ? 'false' : 'true') + ')">' + ((netman.online) ? 'End' : 'Start new') + ' online game</button></td></tr>';
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.copyGID()">Copy GID</button></td></tr>';
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="savetoClipboard(\'' + baseURL + '&role=master&action=message&message=button0&gid=\' + netman.gid )">Copy Button URL</button></td></tr>';
+	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.sendClearGamesRequest()">Clear all games</button></td></tr>';
+
 	text += '    <tr><td class="settingsbodytd"><button class="larger" onClick="netman.sendButtonPressRequest(undefined)">Button test</button></td></tr>';
 	text += '</table></div></div>';
 	console.log("Opening net settings");
@@ -188,6 +190,26 @@ class NetworkManager {
 				}
 			};
 			xhttp.open("POST", baseURL + "&role=master&action=message&message=button0&lastCID=0&gid=" + this.gid, true);
+			let pl = payload;
+			if(typeof payload !== 'string') {
+				pl = JSON.stringify(payload);
+			}
+			if(payload == undefined) {
+				pl = "null";
+			}
+			xhttp.send(pl);
+		}
+	}
+
+	sendClearGamesRequest(payload) {
+		if(confirm('Are you sure you want to clear all games? This includes the current game.')) {
+			let xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4) {
+					console.log(this.status + ": " + this.responseText);
+				}
+			};
+			xhttp.open("POST", baseURL + "&role=master&action=clear&confirm=true", true);
 			let pl = payload;
 			if(typeof payload !== 'string') {
 				pl = JSON.stringify(payload);
