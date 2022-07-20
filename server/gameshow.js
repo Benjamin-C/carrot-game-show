@@ -256,6 +256,9 @@ function notifyWaiters(game, toSend) {
  * ██       ██   ██  ██    ██  ██       ██            ██       ██       ██   ██  ██       ██ ▄▄ ██  ██    ██  ██            ██     ██          ██
  * ██       ██   ██   ██████    ██████  ███████  ███████  ███████       ██   ██  ███████   ██████    ██████   ███████  ███████     ██     ███████
  */
+
+let listenerID = undefined;
+
 /**
  * Prosses an HTTP Request
  * @param  {Array} args The arguments from the request
@@ -269,6 +272,18 @@ function process(args, body, res) {
 
 
   switch(args.role) {
+  case 'reciver': {
+    listenerID = setTimeout(() => {
+      console.log(body);
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end("You recived nothing");
+      console.log(currentGames)
+    }, 3*1000)
+  } break;
+  case 'button': {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("Thanks!");
+  } break;
   /*
    * ██    ██  ██  ███████  ██     ██  ███████  ██████
    * ██    ██  ██  ██       ██     ██  ██       ██   ██

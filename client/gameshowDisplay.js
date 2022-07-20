@@ -8,7 +8,7 @@
  * Builds the visible parts of the gameshow
  */
 function build() {
-	console.log("Building");
+	// console.log("Building");
 	switch (myMode) {
 		// For when the gameshow view window is supposed to be playing videos
 		case MyModes.VIDEO: {
@@ -215,7 +215,7 @@ function getAnswerTable(privileged, doc, vsf) {
 	privileged = (privileged === undefined) ? true : privileged;
 	doc = (doc === undefined) ? gamePanel : doc;
 	vsf = (vsf === undefined) ? 0.6 : vsf;
-	console.log("m:" + privileged);
+	// console.log("m:" + privileged);
 	let tbl = "<h1 id=\"title\">" + playfield.title + "</h1><table class=\"gametable\">";
 	// let boxwidth = Math.round($("#table").width() / playfield.width);
 	// let boxheight = Math.round($("#table").height() / playfield.height *0.7);
@@ -325,7 +325,7 @@ function drawScore() {
 	var scb = "<table><tr>";
 	// Calculate the correct team scores
 	calcTeamPoints();
-	console.log(playfield.teams);
+	// console.log(playfield.teams);
 	// Display the team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
@@ -674,6 +674,7 @@ function highlightBox(num, state, solo) {
 
 let randomizing = false;
 let randomizerid = undefined;
+const RANDOMIZER_CALLBACK_NAME = "randomizercallback";
 
 function genRandomizerMenuInnards() {
 	let text = "";
@@ -723,6 +724,12 @@ function startRandomizing() {
 		stopRandomizing();
 	}
 	lastRandCell = -1;
+	netman.addCallback(RANDOMIZER_CALLBACK_NAME, (item) => {
+		let msg = item.message.substring(item.message.indexOf(')') + 3);
+		if(msg.startsWith("button")) {
+			stopRandomizing();
+		}
+	});
 	doRandomizing();
 	randomizerid = window.setInterval(doRandomizing, playfield.randomizerInterval);
 }
@@ -732,6 +739,7 @@ function stopRandomizing() {
 		window.clearInterval(randomizerid);
 		randomizerid = undefined;
 	}
+	netman.removeCallback(RANDOMIZER_CALLBACK_NAME);
 }
 
 let lastRandCell = -1;
@@ -742,5 +750,4 @@ function doRandomizing() {
 	}
 	highlightBox(nnum, true, true);
 	lastRandCell = nnum;
-	console.log("Randomizing!" + nnum);
 }
