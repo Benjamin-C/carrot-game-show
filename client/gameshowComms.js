@@ -38,6 +38,8 @@ class NetworkManager {
 		this.key = '';
 		this.lastCID = 0;
 		this.callbacks = new Map();
+		this.errorCount = 0;
+		this.maxErrors = 5;
 	}
 
 	addCallback(name, cb) {
@@ -129,6 +131,12 @@ class NetworkManager {
 		}
 	}
 
+	goOffline() {
+		this.online = false;
+		document.getElementById("onlinestatus").innerHTML = "<span style=\"color:red\">offline</span>";
+		alert('The game has gone offline');
+	}
+
 	// Sends a reciver request to the server
 	sendReciverRequest() {
 		if(this.online) {
@@ -136,12 +144,6 @@ class NetworkManager {
 			let nm = this;
 			xhttp.onreadystatechange = function() {
 				if (this.readyState == 4) {
-					// console.log("Update: ", this);
-					// switch(this.status) {
-					//   case 200: { console.log(this.responseText); } break;
-					//   case 503: {document.getElementById("body").innerHTML = "The node server is currently down."} break;
-					//   default: {document.getElementById("body").innerHTML = "Status: " + this.status ;} break;
-					// }
 					switch(this.status) {
 					case 200: {
 						console.log(this.status + ": " + this.responseText);
@@ -151,22 +153,42 @@ class NetworkManager {
 							if(ro.id !== undefined) {
 								console.log(ro.item)
 								nm.lastCID = ro.id;
-								if(ro.item.cause == "message") {
-									console.log("Got message: " + ro.item.message)
+								switch(ro.item.cause) {
+									case "message": {
+										console.log("Got message: " + ro.item.message)
+										nm.callbacks.forEach((cb, name, map) => {
+											cb(ro.item);
+										});
+										nm.errorCount = 0;
+									} break;
+									case "server-closing": {
+										nm.goOffline();
+									}
 								}
-								nm.callbacks.forEach((cb, name, map) => {
-									cb(ro.item);
-								});
 							}
 						});
 					} break;
 					case 204: {
 						console.log("No new messages");
 					} break;
+					case 400: {
+						nm.errorCount++;
+					} break;
 					case 503: { console.log("The node server is currently down."); } break;
+					case 0: { // Seems to be when server is offline
+						nm.goOffline();
+					} break;
 					default: { console.log("Status: " + this.status); } break;
 					}
-					nm.sendReciverRequest();
+					if(nm.errorCount < nm.maxErrors) {
+						if(nm.online) {
+							nm.sendReciverRequest();
+						} else {
+							console.log('Game is in offline mode');
+						}
+					} else {
+						console.log("Too many errors, stopping");
+					}
 				}
 			};
 			xhttp.open("POST", baseURL + "&role=viewer&action=wait&lastCID=" + this.lastCID + "&gid=" + this.gid, true);

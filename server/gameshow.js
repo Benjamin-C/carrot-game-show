@@ -522,6 +522,13 @@ function process(args, body, res) {
       case "clear": {
         res.writeHead(200, {'Content-Type': 'text/html'});
         if(args.confirm == "true") {
+          currentGames.forEach((game, key, map) => {
+            if(game !== undefined) {
+              let r = new Object();
+              r.cause = "server-closing";
+              game.sendUpdate(r);
+            }
+          });
           currentGames.clear();
           res.end("Cleared");
           console.log('Cleared all games');
