@@ -256,9 +256,10 @@ function genAnswerTableBoxText(num, boxwidth, boxheight) {//, showans, hide, pri
 	// if(privileged) {
 		// if (!hide) {
 	let q = playfield.questions[num];
-	if(num != playfield.currentBig && ((q.used && q.hideA) || (!q.used && q.hideQ))) {
+	console.log(isValidQuestionNum(playfield.currentBig));
+	if(playfield.biganswer && num != playfield.currentBig && ((q.used && q.hideA) || (!q.used && q.hideQ))) {
 		return rtxt + nbsp(1) + "</h1>";
-	} else if(num != playfield.currentBig && ((q.used && q.aIsPts) || (!q.used && q.qIsPts))) {
+	} else if(playfield.biganswer && num != playfield.currentBig && ((q.used && q.aIsPts) || (!q.used && q.qIsPts))) {
 		return rtxt + q.points + "</h1>";
 	} else {
 		let txt = ((q.used) ? q.answer : q.question)
