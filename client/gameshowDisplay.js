@@ -100,7 +100,9 @@ function build() {
 		gamePanel.document.title = "BenGameShow";
 		//document.getElementById('control').innerHTML = "</div><center><table><tr><td><h1 id=\"score\"></h1></td><td><button onclick=\"savejson()\"><h1>Save</h1></button></td></tr></table></center>";
 		if(playfield.currentBig !== undefined && playfield.currentBig >= 0) {
-			let box = getNewAnswerTableBox_param(playfield.currentBig, true, false);
+			let boxwidth = Math.round($(document).width() );
+			let boxheight = Math.round($(document).height() *0.6);
+			let box = getNewAnswerTableBox(playfield.currentBig, boxwidth, boxheight);
 			gamePanel.document.getElementById("table").innerHTML = "<table><tr>" + box + "</tr></table>";
 			gamePanel.document.getElementById("box" + playfield.currentBig).className = "gametd center";
 			gamePanel.document.getElementById("text" + playfield.currentBig).className = "center";
@@ -164,18 +166,22 @@ function getNewControlTableBox_param(num, used) {
 		txt += "class=\"disabledbutton\" disabled ";
 	}
 	txt += "onclick=\"";
-	if (used) {
-		txt = txt + "hideans(" + num + ")\">" + makeHideButton(num);
+	if(used) {
+		if(playfield.currentBig == num) {
+			txt = txt + "doneans(" + num + ")\"><h3>Done</h3>";
+		} else {
+			txt = txt + "hideans(" + num + ")\">" + makeHideButton(num);
+		}
 	} else { // "doneans(" + num + ")
-		// txt += "showans(" + num + ")\"><h3>"
+		// txt += "showQuest(" + num + ")\"><h3>"
 		if(playfield.biganswer) {
 			if(playfield.currentBig !== num) {
-				txt += "showans(" + num + ")\"><h3>Show</h3>";
+				txt += "showQuest(" + num + ")\"><h3>Show</h3>";
 			} else {
-				txt += "doneans(" + num + ")\"><h3>Done</h3>";
+				txt += "showAns(" + num + ")\"><h3>Ans</h3>";
 			}
 		} else {
-			txt += "showans(" + num + ")\"><h3>Answer</h3>";
+			txt += "showQuest(" + num + ")\"><h3>Answer</h3>";
 		}
 	}
 	txt += "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/>"
@@ -195,6 +201,12 @@ function getNewControlTableBox_param(num, used) {
 	txt += "</tr><tr>";
 	txt += makeConfigCheckbox("dotr", num, playfield.questions[num].randomizable, "Randomizable");
 	txt += makeConfigCheckbox("doti", num, playfield.questions[num].isGraphic, "Graphics");
+	txt += "</tr><tr>";
+	txt += makeConfigCheckbox("dohq", num, playfield.questions[num].hideQ, "Hide Q");
+	txt += makeConfigCheckbox("doha", num, playfield.questions[num].hideA, "Hide A");
+	txt += "</tr><tr>";
+	txt += makeConfigCheckbox("dopq", num, playfield.questions[num].qIsPts, "Q is pts");
+	txt += makeConfigCheckbox("dopa", num, playfield.questions[num].aIsPts, "A is pts");
 	txt += "</tr></table></center>";
 	txt += "Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>";
 	txt += "Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/><br/>"
@@ -230,7 +242,7 @@ function getAnswerTable(privileged, doc, vsf) {
 		tbl = tbl + "<tr>";
 		let j;
 		for (j = 0; j < playfield.width; j++) {
-			tbl = tbl + getNewAnswerTableBox(i + (j * playfield.height), boxwidth, boxheight, privileged);
+			tbl = tbl + getNewAnswerTableBox(i + (j * playfield.height), boxwidth, boxheight);
 		}
 		tbl = tbl + "</tr>";
 	}
@@ -244,66 +256,61 @@ function genAnswerTableBoxText(num, boxwidth, boxheight) {//, showans, hide, pri
 	// if(privileged) {
 		// if (!hide) {
 	let q = playfield.questions[num];
-	let txt = ((q.used) ? q.answer : q.question)
-	if(q.isGraphic && txt.startsWith("http")) {
-		return "<img src=\"" + txt + "\" style=\"width:" + boxwidth + "px;max-height=" + boxheight + "px\">";
+	if(num != playfield.currentBig && ((q.used && q.hideA) || (!q.used && q.hideQ))) {
+		return rtxt + nbsp(1) + "</h1>";
+	} else if(num != playfield.currentBig && ((q.used && q.aIsPts) || (!q.used && q.qIsPts))) {
+		return rtxt + q.points + "</h1>";
 	} else {
-		// console.log(txt)
-		if(txt.startsWith("\\")) {
-			txt = txt.substring(1);
-		}
-		if (q.used) {
-			if(q.showScore == true) {
-				let team = q.team;
-				console.log(team);
-				if(q.showteam == true && isValidTeamNum(team)) {
-					txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + q.points + ']</span>';
-					// txt += playfield.teams[team].forecol
-					console.log(txt);
-				} else {
-					txt += " [" + q.points + "]"
-					console.log(txt);
-				}
-				console.log('Score' + num);
-			} else {
-				console.log('No score' + num);
+		let txt = ((q.used) ? q.answer : q.question)
+		if(q.isGraphic && txt.startsWith("http")) {
+			return "<img id=\"text" + num + "\" src=\"" + txt + "\" style=\"width:" + boxwidth + "px;max-height=" + boxheight + "px\">";
+		} else {
+			// console.log(txt)
+			if(txt.startsWith("\\")) {
+				txt = txt.substring(1);
 			}
+			if (q.used) {
+				if(q.showScore == true) {
+					let team = q.team;
+					console.log(team);
+					if(q.showteam == true && isValidTeamNum(team)) {
+						txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + q.points + ']</span>';
+						// txt += playfield.teams[team].forecol
+						console.log(txt);
+					} else {
+						txt += " [" + q.points + "]"
+						console.log(txt);
+					}
+					// console.log('Score' + num);
+				} else {
+					// console.log('No score' + num);
+				}
+			}
+			rtxt += txt + '</h1>';
+			return rtxt;
 		}
-		rtxt += txt + '</h1>';
-		return rtxt;
 	}
 }
 
 // Gets the boxes for the abve table
-function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheight, privileged) {
-	privileged = (privileged === undefined) ? true : privileged;
-	// console.log(privileged);
-	// console.log(playfield.questions[num]);
+function getNewAnswerTableBox(num, boxwidth, boxheight) {
 	let txt = "<td id=\"box" + num + "\" class=\"gametd";
-	if (isqused) {
+	let q = playfield.questions[num];
+	if (q.used) {
 		txt += " used";
 	}
 	txt = txt + "\" width=" + boxwidth + " height=" + boxheight + " style=\"background-color:#";
-	if(playfield.questions[num].highlighted) {
-		txt += playfield.questions[num].highlightcolor;
+	if(q.highlighted) {
+		txt += q.highlightcolor;
 	} else {
-		if(privileged) {
-			if (isqused) {
-				txt += playfield.questions[num].usedcolor;
-			} else {
-				txt += playfield.questions[num].unusedcolor;
-			}
+		if (q.used) {
+			txt += q.usedcolor;
 		} else {
-			txt += playfield.questions[num].color;
+			txt += q.unusedcolor;
 		}
 	}
 	txt += "\">" + genAnswerTableBoxText(num, boxwidth, boxheight) + "</td>";
 	return txt;
-}
-
-// Gets the boxes for the above table, but with more default values
-function getNewAnswerTableBox(num, boxwidth, boxheight, privileged) {
-	return getNewAnswerTableBox_param(num, playfield.questions[num].used, playfield.questions[num].used, (playfield.biganswer && playfield.questions[num].used), boxwidth, boxheight, privileged);
 }
 
 // Hides the score display
@@ -461,13 +468,20 @@ function makeHideButton(num) {
 }
 
 // Shows an answer to a question
-function showans(num) {
+function showQuest(num) {
 	update(num);
 	if (playfield.biganswer) {
 		playfield.currentBig = num;
 	} else {
 		playfield.questions[num].used = true;
 	}
+	build();
+}
+
+// Function to call when done viewing a large question
+function showAns(num) {
+	update(num);
+	playfield.questions[num].used = true;
 	build();
 }
 
@@ -508,29 +522,7 @@ function looks(num) {
 // Updates colors and some text
 function update(num) {
 	let question = makejobject(num, playfield.questions[num]);
-
-	let used = !(question.used == null || question.used == false);
-	document.getElementById("box" + num).className = "gametd";
-	gamePanel.document.getElementById("box" + num).className = "gametd";
-
-	if (used) {
-		document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
-		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.usedcolor;
-		document.getElementById("box" + num).classList.add("used");
-		gamePanel.document.getElementById("box" + num).classList.add("used");
-		console.log("used");
-	} else {
-		document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
-		gamePanel.document.getElementById("box" + num).style = "background-color:#" + question.unusedcolor;
-
-		console.log("Unused");
-	}
-
-	gamePanel.document.getElementById("box" + num).innerHTML =  genAnswerTableBoxText(num, true, false, true);
-
-	netman.updateCell(num);
-
-	cacheGame(); // Put here because setcol() is called after each time a question is changed from the answer,hide,or looks buttons, so that the game essentially autosaves often.
+	cacheGame(); // Autosave when anything important happens
 }
 
 // Change the title

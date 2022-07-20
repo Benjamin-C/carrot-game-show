@@ -147,6 +147,10 @@ function makejobject(i, o) {
 	obj.highlighted = document.getElementById('doth' + i).checked;
 	obj.randomizable = document.getElementById('dotr' + i).checked;
 	obj.isGraphic = document.getElementById('doti' + i).checked;
+	obj.hideQ = document.getElementById('dohq' + i).checked;
+	obj.hideA = document.getElementById('doha' + i).checked;
+	obj.qIsPts = document.getElementById('dopq' + i).checked;
+	obj.aIsPts = document.getElementById('dopa' + i).checked;
 	return obj;
 }
 
