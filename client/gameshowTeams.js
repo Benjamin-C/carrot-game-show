@@ -125,7 +125,7 @@ function closeTeamMenu() {
 
 // Updates each team's score variable to the correct value
 function calcTeamPoints() {
-	console.log("Calculating points ...");
+	// console.log("Calculating points ...");
 	let teams = playfield.teams;
 	let qs = playfield.questions;
 	for(let i = 0; i < teams.length; i++) {

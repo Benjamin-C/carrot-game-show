@@ -88,6 +88,21 @@ function loadjson(json) {
 									if(playfield.showScore === undefined) {
 										playfield.showScore = true;
 									}
+									for(let cln = 0; cln < playfield.width * playfield.height; cln++) {
+										let q = playfield.questions[cln]
+										if(q.highlightcolor === undefined || q.highlightcolor == "undefined") {
+											q.highlightcolor = "FFFFFF";
+										}
+										if(q.highlighted === undefined) {
+											q.highlighted = false;
+										}
+										if(q.randomizable === undefined) {
+											q.randomizable = true;
+										}
+										if(q.isGraphic === undefined) {
+											q.isGraphic = false;
+										}
+									}
 								} else {
 									console.log('JSON loading error');
 									alert("Error reading playfield data.")
@@ -125,9 +140,13 @@ function makejobject(i, o) {
 	obj.points = parseInt(document.getElementById('pts' + i).value);
 	obj.unusedcolor = document.getElementById('cols' + i).value;
 	obj.usedcolor = document.getElementById('cold' + i).value;
+	obj.highlightcolor = document.getElementById('colh' + i).value;
 	obj.question = document.getElementById('ques' + i).value;
 	obj.showScore = document.getElementById('dosc' + i).checked;
 	obj.showteam = document.getElementById('dotm' + i).checked;
+	obj.highlighted = document.getElementById('doth' + i).checked;
+	obj.randomizable = document.getElementById('dotr' + i).checked;
+	obj.isGraphic = document.getElementById('doti' + i).checked;
 	return obj;
 }
 

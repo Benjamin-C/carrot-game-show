@@ -2,7 +2,7 @@
 //  let gridScore = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 
 // Should probably be updated to generate this from the web url
-const baseURL = 'http://mccreas.us:33543/node?use=gameshow';
+const baseURL = window.location.origin + '/node?use=gameshow';
 
 // Unused
 function matchRule(str, rule) {
@@ -27,7 +27,7 @@ let playerFunc = function() {
 let controlFunc = function() {
 	console.log("Launghing");
 	document.title = "Control BenGameShow";
-	document.getElementById("topnav").innerHTML = "<input id=\"fadebox\" type=\"checkbox\">Fade</input><input type=\"file\" id=\"files\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick some questions\" onclick=\"document.getElementById('files').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Load from cache\" onclick=\"handleCacheSelect()\" />" + " or " + "<input type=\"file\" id=\"videos\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick a video\" onclick=\"document.getElementById('videos').click()\" />" + " or " + "<input type=\"file\" id=\"images\" style=\"display: none;\" /><input  class=\"button\" type=\"button\" value=\"Pick an Image\" onclick=\"document.getElementById('images').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Blank\" onclick=\"prepareBlank()\" />&nbsp&nbsp&nbsp";//<button onClick=\"openNetworkSettings()\">Online Settings</button>"; Online settings is disabled for now
+	document.getElementById("topnav").innerHTML = "<input id=\"fadebox\" type=\"checkbox\">Fade</input><input type=\"file\" id=\"files\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick some questions\" onclick=\"document.getElementById('files').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Load from cache\" onclick=\"handleCacheSelect()\" />" + " or " + "<input type=\"file\" id=\"videos\" style=\"display: none;\" /><input class=\"button\" type=\"button\" value=\"Pick a video\" onclick=\"document.getElementById('videos').click()\" />" + " or " + "<input type=\"file\" id=\"images\" style=\"display: none;\" /><input  class=\"button\" type=\"button\" value=\"Pick an Image\" onclick=\"document.getElementById('images').click()\" />" + " or " + "<input class=\"button\" type=\"button\" value=\"Blank\" onclick=\"prepareBlank()\" />&nbsp&nbsp&nbsp<button onClick=\"openNetworkSettings()\">Online Settings</button>";// Online settings is disabled for now
 	document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	document.getElementById('videos').addEventListener('change', handleVideoSelect, false);
 	document.getElementById('images').addEventListener('change', handleImageSelect, false);
@@ -141,7 +141,10 @@ function startnew() {
 		obj.showScore = false;
 		obj.unusedcolor = "0000FF";
 		obj.usedcolor = "0080FF";
+		obj.highlightcolor = "808080";
+		obj.randomizable = true;
 		obj.question = "";
+		obj.isGraphic = false;
 		playfield.questions[i] = obj;
 	}
 	prepare("blank");
@@ -223,6 +226,10 @@ function prepare(json) {
 	myMode = MyModes.GAME;
 	meWaiting = true;
 	meReady();
+}
+
+function isValidQuestionNum(num) {
+	return num >= 0 && num < (playfield.width * playfield.height);
 }
 
 // Needs gameshowStorage.js

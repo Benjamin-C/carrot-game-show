@@ -8,7 +8,7 @@
  * Builds the visible parts of the gameshow
  */
 function build() {
-	console.log("Building");
+	// console.log("Building");
 	switch (myMode) {
 		// For when the gameshow view window is supposed to be playing videos
 		case MyModes.VIDEO: {
@@ -75,7 +75,14 @@ function build() {
 		if(playfield.squarebox) {
 			squareboxstr = "checked=\"" + "true" + "\"";
 		}
-		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"configcolor\" type=\"checkbox\" onclick=\"setShowColorConfig()\">Config Color</input><table class=\"gametable\">";
+		let showconfigstr = "";
+		let cccb = document.getElementById("showconfig");
+		if(cccb != undefined) {
+			if(cccb.checked) {
+				showconfigstr = "checked";
+			}
+		}
+		let tbl = "<h1 id=\"title\">" + playfield.title + biga + "</h1><input id=\"titlebox\" type=\"text\" value=\"" + playfield.title + "\"/><input id=\"bigansbox\" type=\"checkbox\" " + biganswerstr + ">Big Answer</input><input id=\"squareboxbox\" type=\"checkbox\" " + squareboxstr +">Square box</input><button onclick=\"titlechange()\">mod</button><input id=\"showconfig\" type=\"checkbox\" onclick=\"setShowConfig()\" " + showconfigstr + ">Show Config</input><table class=\"gametable\">";
 		for (let i = 0; i < playfield.height; i++) {
 			tbl = tbl + "<tr>";
 			for (let j = 0; j < playfield.width; j++) {
@@ -85,7 +92,7 @@ function build() {
 		}
 		tbl = tbl + "</table>";
 		document.getElementById("table").innerHTML = tbl;
-		let ctlhtml = "<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
+		let ctlhtml = "<button onclick=\"openRandomizerMenu()\"><h1>Rand</h1></button>&nbsp<button onclick=\"build()\"><h1>Build</h1></button>&nbsp<button onclick=\"savejson()\"><h1>Save</h1></button>&nbsp";
 		ctlhtml = ctlhtml + "<button onclick=\"showXr()\"><h1 style=\"color:#FF0080\">R</h1></button><button id=\"xtb0\" onclick=\"showX(0)\"><h1 style=\"color:#FF0000\">&nbsp&nbsp</h1></button><button id=\"xtb1\" onclick=\"showX(1)\" style=\"background-color:#808080\"><h1 style=\"color:#FF0000\">X</h1></button><button id=\"xtb2\" onclick=\"showX(2)\"><h1 style=\"color:#FF0000\">XX</h1></button><button id=\"xtb3\" onclick=\"showX(3)\"><h1 style=\"color:#FF0000\">XXX</h1></button>";
 		document.getElementById("control").innerHTML = ctlhtml;
 
@@ -113,8 +120,8 @@ function build() {
 }
 
 // Shows or hides the color modification boxes for cleaner view if you are not changing colors
-function setShowColorConfig() {
-	showColorConfig = document.getElementById('configcolor').checked;
+function setShowConfig() {
+	showColorConfig = document.getElementById('showconfig').checked;
 	for (let i = 0; i < playfield.height; i++) {
 		for (let j = 0; j < playfield.width; j++) {
 			let num = (i + (j * playfield.height))
@@ -123,17 +130,19 @@ function setShowColorConfig() {
 	}
 }
 
+function makeConfigCheckbox(id, num, checked, text, func, table) {
+	if(func == undefined) {
+		func = "looks";
+	}
+	if(table == undefined) {
+		table = true;
+	}
+	return ((table) ? "<td>" : "") + "<input id=\"" + id + num + "\" type=\"checkbox\" " + ((checked) ? "checked" : "") + " onclick=\"" + func + "(" + num + ")\">" + text + "</input>" + ((table) ? "</td>" : "");
+}
+
 // Creates a table element to add to the control table for a specific cell.
 // <button onclick=\"myclickkeep(" + num + ")\"><h3>" + (num + 1) + "(" + questions[num].points + "): " + questions[num].answer + "</h3></button>
 function getNewControlTableBox_param(num, used) {
-	let showscorevalue = "";
-	if (playfield.questions[num].showScore) {
-		showscorevalue = "checked";
-	}
-	let showteamvalue = "";
-	if (playfield.questions[num].showteam) {
-		showteamvalue = "checked";
-	}
 	let txt = "<td id=\"box" + num + "\" class=\""
 	txt = txt + "gametd"
 	if (used) {
@@ -141,10 +150,14 @@ function getNewControlTableBox_param(num, used) {
 	}
 	// txt = txt + "\" width=\"64\" style=\"background-color:";
 	txt = txt + "\" style=\"background-color:#";
-	if (used) {
-		txt = txt + playfield.questions[num].usedcolor;
+	if(playfield.questions[num].highlighted) {
+		txt += playfield.questions[num].highlightcolor;
 	} else {
-		txt = txt + playfield.questions[num].unusedcolor;
+		if (used) {
+			txt = txt + playfield.questions[num].usedcolor;
+		} else {
+			txt = txt + playfield.questions[num].unusedcolor;
+		}
 	}
 	txt = txt + "\"><input id=\"ques" + num + "\" type=\"text\" value=\"" + playfield.questions[num].question + "\"/><br/><input id=\"ans" + num + "\" type=\"text\" value=\"" + playfield.questions[num].answer + "\"/><input id=\"pts" + num + "\" class=\"numbox\" type=\"text\" value=\"" + playfield.questions[num].points + "\"/><br/><button id=\"ansbtn" + num + "\" "
 	if(playfield.biganswer && playfield.currentBig >= 0 && playfield.currentBig !== num) {
@@ -165,8 +178,28 @@ function getNewControlTableBox_param(num, used) {
 			txt += "showans(" + num + ")\"><h3>Answer</h3>";
 		}
 	}
-	txt = txt + "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/><input id=\"dosc" + num + "\" type=\"checkbox\" " + showscorevalue + ">Show Score</input><input id=\"dotm" + num + "\" type=\"checkbox\" " + showteamvalue + ">Show Team</input><br/>";
-	txt = txt + "<div id=\"box" + num + "color\" style=\"display:none\">Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/></td></div>"
+	txt += "</button>&nbsp;<button onclick=\"looks(" + num + ")\"><h3>looks</h3></button><br/>"
+	txt += makeConfigCheckbox("doth", num, playfield.questions[num].highlighted, "Highlight", "updateHighlight", false);
+
+	let hidestr = "style=\"display:none\"";
+	let cccb = document.getElementById("showconfig");
+	if(cccb != undefined) {
+		if(cccb.checked) {
+			hidestr = "";
+		}
+	}
+	txt += "<div id=\"box" + num + "color\" " + hidestr + ">";
+	txt += "<center><table><tr>";
+	txt += makeConfigCheckbox("dotm", num, playfield.questions[num].showteam, "Show Team");
+	txt += makeConfigCheckbox("dosc", num, playfield.questions[num].showScore, "Show Score");
+	txt += "</tr><tr>";
+	txt += makeConfigCheckbox("dotr", num, playfield.questions[num].randomizable, "Randomizable");
+	txt += makeConfigCheckbox("doti", num, playfield.questions[num].isGraphic, "Graphics");
+	txt += "</tr></table></center>";
+	txt += "Unused color<input id=\"cols" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].unusedcolor + "\"/><br/>";
+	txt += "Used color<input id=\"cold" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].usedcolor + "\"/><br/>"
+	txt += "Highlight color<input id=\"colh" + num + "\" class=\"colbox\" value=\"" + playfield.questions[num].highlightcolor + "\"/><br/>";
+	txt += "</td></div>"
 
 	return txt;
 }
@@ -182,7 +215,7 @@ function getAnswerTable(privileged, doc, vsf) {
 	privileged = (privileged === undefined) ? true : privileged;
 	doc = (doc === undefined) ? gamePanel : doc;
 	vsf = (vsf === undefined) ? 0.6 : vsf;
-	console.log("m:" + privileged);
+	// console.log("m:" + privileged);
 	let tbl = "<h1 id=\"title\">" + playfield.title + "</h1><table class=\"gametable\">";
 	// let boxwidth = Math.round($("#table").width() / playfield.width);
 	// let boxheight = Math.round($("#table").height() / playfield.height *0.7);
@@ -206,36 +239,39 @@ function getAnswerTable(privileged, doc, vsf) {
 }
 
 // Gets the text to show in the box. num is the question num. Not sure what the commented stuff is meant to do
-function genAnswerTableBoxText(num) {//, showans, hide, privileged) {
-	let txt = '<h1 id=text' + num + '>';
+function genAnswerTableBoxText(num, boxwidth, boxheight) {//, showans, hide, privileged) {
+	let rtxt = '<h1 id=text' + num + '>';
 	// if(privileged) {
 		// if (!hide) {
-	if (playfield.questions[num].used) {
-		txt = txt + playfield.questions[num].answer;
-		if(playfield.questions[num].showScore == true) {
-			let team = playfield.questions[num].team;
-			console.log(team);
-			if(playfield.questions[num].showteam == true && isValidTeamNum(team)) {
-				txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + playfield.questions[num].points + ']</span>';
-				// txt += playfield.teams[team].forecol
-				console.log(txt);
-			} else {
-				txt += " [" + playfield.questions[num].points + "]"
-				console.log(txt);
-			}
-			console.log('Score' + num);
-		} else {
-			console.log('No score' + num);
-		}
+	let q = playfield.questions[num];
+	let txt = ((q.used) ? q.answer : q.question)
+	if(q.isGraphic && txt.startsWith("http")) {
+		return "<img src=\"" + txt + "\" style=\"width:" + boxwidth + "px;max-height=" + boxheight + "px\">";
 	} else {
-		txt = txt + playfield.questions[num].question;
+		// console.log(txt)
+		if(txt.startsWith("\\")) {
+			txt = txt.substring(1);
+		}
+		if (q.used) {
+			if(q.showScore == true) {
+				let team = q.team;
+				console.log(team);
+				if(q.showteam == true && isValidTeamNum(team)) {
+					txt += ' <span style="color:' + playfield.teams[team].forecol + '">[' + q.points + ']</span>';
+					// txt += playfield.teams[team].forecol
+					console.log(txt);
+				} else {
+					txt += " [" + q.points + "]"
+					console.log(txt);
+				}
+				console.log('Score' + num);
+			} else {
+				console.log('No score' + num);
+			}
+		}
+		rtxt += txt + '</h1>';
+		return rtxt;
 	}
-	txt += '</h1>';
-		// }
-	// } else {
-		// txt += playfield.questions[num].text;
-	// }
-	return txt;
 }
 
 // Gets the boxes for the abve table
@@ -248,16 +284,20 @@ function getNewAnswerTableBox_param(num, text, isqused, hide, boxwidth, boxheigh
 		txt += " used";
 	}
 	txt = txt + "\" width=" + boxwidth + " height=" + boxheight + " style=\"background-color:#";
-	if(privileged) {
-		if (isqused) {
-			txt += playfield.questions[num].usedcolor;
-		} else {
-			txt += playfield.questions[num].unusedcolor;
-		}
+	if(playfield.questions[num].highlighted) {
+		txt += playfield.questions[num].highlightcolor;
 	} else {
-		txt += playfield.questions[num].color;
+		if(privileged) {
+			if (isqused) {
+				txt += playfield.questions[num].usedcolor;
+			} else {
+				txt += playfield.questions[num].unusedcolor;
+			}
+		} else {
+			txt += playfield.questions[num].color;
+		}
 	}
-	txt += "\">" + genAnswerTableBoxText(num, text, hide, privileged) + "</td>";
+	txt += "\">" + genAnswerTableBoxText(num, boxwidth, boxheight) + "</td>";
 	return txt;
 }
 
@@ -285,7 +325,7 @@ function drawScore() {
 	var scb = "<table><tr>";
 	// Calculate the correct team scores
 	calcTeamPoints();
-	console.log(playfield.teams);
+	// console.log(playfield.teams);
 	// Display the team scores
 	for(let i = 0; i < playfield.teams.length; i++) {
 		if(i > 0) {
@@ -558,6 +598,7 @@ function dragElement(elmnt) {
 	} else {
 		// otherwise, move the DIV from anywhere inside the DIV:
 		elmnt.onmousedown = dragMouseDown;
+		console.log("No header found, using anywhere insted");
 	}
 
 	function dragMouseDown(e) {
@@ -589,4 +630,124 @@ function dragElement(elmnt) {
 		document.onmouseup = null;
 		document.onmousemove = null;
 	}
+}
+
+/*
+ * ██   ██ ██  ██████  ██   ██ ██      ██  ██████  ██   ██ ████████
+ * ██   ██ ██ ██       ██   ██ ██      ██ ██       ██   ██    ██
+ * ███████ ██ ██   ███ ███████ ██      ██ ██   ███ ███████    ██
+ * ██   ██ ██ ██    ██ ██   ██ ██      ██ ██    ██ ██   ██    ██
+ * ██   ██ ██  ██████  ██   ██ ███████ ██  ██████  ██   ██    ██
+ * Highlighting cells
+ */
+
+function updateHighlight(num) {
+	highlightBox(num, document.getElementById("doth" + num).checked);
+}
+
+// Highlights a box. State is the new state of the box. Solo is to unhighlight everything else.
+// Assumes state=true and solo=false if not specified
+function highlightBox(num, state, solo) {
+	if(state === undefined) {
+		state = true;
+	}
+	if(solo === undefined) {
+		solo = false;
+	}
+	if(solo) {
+		for(let i = 0; i < playfield.width * playfield.height; i++) {
+			playfield.questions[i].highlighted = (i == num) ? state : false;
+		}
+	} else {
+		playfield.questions[num].highlighted = state;
+	}
+	build();
+}
+/*
+ * ██████   █████  ███    ██ ██████   ██████  ███    ███ ██ ███████ ███████ ██████
+ * ██   ██ ██   ██ ████   ██ ██   ██ ██    ██ ████  ████ ██    ███  ██      ██   ██
+ * ██████  ███████ ██ ██  ██ ██   ██ ██    ██ ██ ████ ██ ██   ███   █████   ██████
+ * ██   ██ ██   ██ ██  ██ ██ ██   ██ ██    ██ ██  ██  ██ ██  ███    ██      ██   ██
+ * ██   ██ ██   ██ ██   ████ ██████   ██████  ██      ██ ██ ███████ ███████ ██   ██
+ * Randomly highlight cells every now and then
+ */
+
+let randomizing = false;
+let randomizerid = undefined;
+const RANDOMIZER_CALLBACK_NAME = "randomizercallback";
+
+function genRandomizerMenuInnards() {
+	let text = "";
+	let spacecount = 5
+	text += '<div id="randomizersettingsheader" class="movable-header" style="background-color:404040; color:B0B0B0">' + nbsp(spacecount) + 'Randomizer Config' + nbsp(spacecount) + '<button onclick="closeRandomizerMenu()" class="xitbtn">X</button></div>';
+	// Table with the stuffs in it. Not sure if it was needed, but the example had it, so I do too.
+	text += '  <div class="padded">';
+	text += '<div id="randomizerthingydiv"><center>';
+	text += '<table><tr><td><label for="randomizerinterval">Interval (ms):</label></td><td><input id="randomizerinterval" style="width:4em" type="number" value="' + playfield.randomizerInterval + '" min="0" step="50"/></td></tr></table>'
+	// text += '<label for="randomizerinterval">Interval (ms):</label>'
+	text += '<button onclick=\"startRandomizing()\">Start</button>' + nbsp(2);
+	text += '<button onclick=\"stopRandomizing()\">Stop</button>';// + nbsp(2);
+	text += '</center></div>'
+	text += '</div>';
+
+	return text;
+}
+
+function openRandomizerMenu(teamnum) {
+	if(playfield.randomizerInterval == undefined) {
+		playfield.randomizerInterval = 250;
+	}
+
+  let text = '';
+	// Make a floating window that the gamemaster can move around to their liking
+  text += '<div id="randomizersettings" class="movable">';
+	// Title bar
+	text += genRandomizerMenuInnards();
+	// popup div
+	text += '</div>';
+  console.log("Opening randomizer settings");
+  document.getElementById("floatingbox-randomizer").innerHTML = text;
+  dragElement(document.getElementById("randomizersettings"));
+}
+
+// Close the team settings dialog
+function closeRandomizerMenu() {
+	document.getElementById("floatingbox-randomizer").innerHTML = '';
+}
+
+function startRandomizing() {
+	intervalTextBox = document.getElementById("randomizerinterval");
+	if(intervalTextBox != undefined) {
+		playfield.randomizerInterval = intervalTextBox.value;
+	}
+	if(randomizerid != undefined) {
+		stopRandomizing();
+	}
+	lastRandCell = -1;
+	netman.addCallback(RANDOMIZER_CALLBACK_NAME, (item) => {
+		let msg = item.message.substring(item.message.indexOf(')') + 3);
+		if(msg.startsWith("button")) {
+			stopRandomizing();
+		}
+	});
+	doRandomizing();
+	randomizerid = window.setInterval(doRandomizing, playfield.randomizerInterval);
+}
+
+function stopRandomizing() {
+	if(randomizerid != undefined) {
+		window.clearInterval(randomizerid);
+		randomizerid = undefined;
+	}
+	netman.removeCallback(RANDOMIZER_CALLBACK_NAME);
+}
+
+let lastRandCell = -1;
+function doRandomizing() {
+	let nnum = lastRandCell;
+	while(!isValidQuestionNum(nnum) || nnum == lastRandCell || !playfield.questions[nnum].randomizable) {
+		nnum = Math.floor(Math.random() * (playfield.width * playfield.height));
+	}
+	highlightBox(nnum, true, true);
+	lastRandCell = nnum;
 }
